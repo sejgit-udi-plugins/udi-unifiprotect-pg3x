@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project Specific
+!logs/
+!logs/**
+logs/debug.log
+logs/*.gz
+polyglot.py
+build.txt
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.python-version
+env/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Unit test / coverage reports
+htmlcov/
+.pytest_cache/
+.coverage
+.ruff_cache/
+
+# Environment variables
+.env
+.envrc
+
+# macOS
+.DS_Store
+
+# Vim / Emacs
+*.swp
+*~
+.#*
+
+# Project specific
+polyinterface
+*.cert
+*.key
+*.pid
+*.zip
