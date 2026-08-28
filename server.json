@@ -1,6 +1,6 @@
 {
     "name": "UniFi Protect",
-    "docs": "https://github.com/sejgit/udi-unifiprotect-pg3x",
+    "docs": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x",
     "type": "python3",
     "executable": "udi-unifiprotect-pg3x.py",
     "install": "install.sh",
@@ -24,8 +24,8 @@
             "author": "Stephen Jenkins",
             "version": "1.1.0",
             "date": "August 2026",
-            "source": "https://github.com/sejgit/udi-unifiprotect-pg3x",
-            "license": "https://github.com/sejgit/udi-unifiprotect-pg3x/blob/main/LICENSE"
+            "source": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x",
+            "license": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x/blob/main/LICENSE"
         }
     ]
 }

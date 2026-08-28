@@ -2,7 +2,7 @@
 
 NodeServer for Universal Devices **EISY** or **Polisy** (Polyglot V3) that integrates UniFi Protect cameras with the ISY/IoX home automation controller. Each camera appears as a node with real-time motion and smart detection drivers.
 
-Repository: [sejgit/udi-unifiprotect-pg3x](https://github.com/sejgit/udi-unifiprotect-pg3x)
+Repository: [sejgit-udi-plugins/udi-unifiprotect-pg3x](https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x)
 
 ## Features
 
@@ -24,7 +24,7 @@ Repository: [sejgit/udi-unifiprotect-pg3x](https://github.com/sejgit/udi-unifipr
 
 Add the NodeServer in PG3x:
 
-- **GitHub URL:** `https://github.com/sejgit/udi-unifiprotect-pg3x`
+- **GitHub URL:** `https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x`
 - **Executable:** `udi-unifiprotect-pg3x.py`
 
 See [POLYGLOT_CONFIG.md](POLYGLOT_CONFIG.md) for configuration details.
