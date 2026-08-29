@@ -12,6 +12,8 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-cov",
+]
+lint = [
     "ruff",
 ]
 
