@@ -29,6 +29,18 @@ Add the NodeServer in PG3x:
 
 See [POLYGLOT_CONFIG.md](POLYGLOT_CONFIG.md) for configuration details.
 
+## Development
+
+```bash
+make install    # uv sync --dev
+make test       # pytest (profile + version sync)
+make lint       # ruff
+make fulltest   # pre-commit on all files
+```
+
+Version bumps: edit `VERSION` in `udi-unifiprotect-pg3x.py`, update `CHANGELOG.md`, then `make sync-version`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full release workflow.
+
 ## License
 
 MIT — see [LICENSE](LICENSE)

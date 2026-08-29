@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: sync-version
+        name: Sync profile/version.txt and server.json from VERSION
+        entry: uv run python scripts/sync_version.py --entry udi-unifiprotect-pg3x.py
+        language: system
+        pass_filenames: false
+        files: '(udi-.*\.py|server\.json)$'
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run test suite
+        entry: bash -c 'uv run pytest || [ $? -eq 5 ]'
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]

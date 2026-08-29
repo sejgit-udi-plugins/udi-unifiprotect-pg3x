@@ -1,15 +1,43 @@
+NAME = UniFi-Protect
 ENTRY = udi-unifiprotect-pg3x.py
+XML_FILES = profile/*/*.xml
 
-.PHONY: all check clean sync-version
+.PHONY: all check clean format fulltest install lint test coverage coverage-html coverage-report zip sync-version
 
-all: check
+all: lint test
 
 check:
-	xmllint --noout profile/nodedef/nodedefs.xml profile/editor/editors.xml
+	xmllint --noout $(XML_FILES)
+
+install:
+	uv sync --dev
+
+lint:
+	uv run ruff check .
+
+format:
+	uv run ruff format .
+
+sync-version:
+	uv run python scripts/sync_version.py --entry $(ENTRY)
 
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+	rm -rf .pytest_cache .ruff_cache htmlcov .coverage
 
-sync-version:
-	python3 scripts/sync_version.py --entry $(ENTRY)
+test:
+	uv run pytest
+
+coverage:
+	uv run pytest --cov=nodes --cov=utils --cov-report=term-missing
+
+coverage-html:
+	uv run pytest --cov=nodes --cov=utils --cov-report=html --cov-report=term-missing
+
+fulltest:
+	uv run pre-commit run --all-files
+
+zip:
+	@test -f zip_exclude.lst || (echo "zip_exclude.lst missing" && exit 1)
+	zip -x@zip_exclude.lst -r $(NAME).zip *

@@ -1,2 +1,2 @@
-udi_interface
+udi_interface>=3.3.12
 aiohttp

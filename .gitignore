@@ -15,7 +15,6 @@ build.txt
 *.so
 
 # Distribution / packaging
-.python-version
 env/
 .venv/
 venv/
