@@ -45,3 +45,4 @@ polyinterface
 *.key
 *.pid
 *.zip
+crash.log
