@@ -9,10 +9,10 @@
     "longPoll": "300",
     "logLevel": "INFO",
     "customParams": {
-        "host": "",
+        "host": "unifi.local",
         "port": "443",
         "api_key": "",
-        "username": "",
+        "username": "admin",
         "password": "",
         "verify_ssl": "false",
         "detection_timeout": "300",
