@@ -78,35 +78,29 @@ Each Protect camera becomes an ISY node keyed by MAC address (stable across re-a
 
 ### Drivers
 
-| Driver | Description |
-|--------|-------------|
-| Connected | Camera is online |
-| Motion | Motion detected |
-| Person | Person smart detection |
-| Vehicle | Vehicle smart detection |
-| Animal | Animal smart detection |
-| Package | Package smart detection |
-| Ring Volume | Doorbell speaker volume (0–100%) |
-| Repeat Times | Ringtone repeat count (1–5) |
-| Ringtone | Current ringtone (names loaded from Protect) |
+- **Connected** — camera is online
+- **Motion** — motion detected
+- **Person** — person smart detection
+- **Vehicle** — vehicle smart detection
+- **Animal** — animal smart detection
+- **Package** — package smart detection
+- **Ring Volume** — doorbell speaker volume (0–100%)
+- **Repeat Times** — ringtone repeat count (1–5)
+- **Ringtone** — current ringtone (names loaded from Protect)
 
 Ring Volume, Repeat Times, and Ringtone apply to cameras with speakers (doorbells).
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| Set Ringtone | Choose ringtone from dropdown (names from Protect) |
-| Set Ring Volume | Set doorbell volume |
-| Set Repeat Times | Set how many times the ringtone plays |
-| Query | Refresh drivers from the Protect API |
+- **Set Ringtone** — choose ringtone from dropdown (names from Protect)
+- **Set Ring Volume** — set doorbell volume
+- **Set Repeat Times** — set how many times the ringtone plays
+- **Query** — refresh drivers from the Protect API
 
 ## Controller commands
 
-| Command | Description |
-|---------|-------------|
-| Re-Discover | Re-sync cameras and speaker settings from Protect |
-| Query All | Report all controller and camera drivers |
+- **Re-Discover** — re-sync cameras and speaker settings from Protect
+- **Query All** — report all controller and camera drivers
 
 ## Troubleshooting
 

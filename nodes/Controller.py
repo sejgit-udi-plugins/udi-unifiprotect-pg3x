@@ -113,29 +113,46 @@ class Controller(udi_interface.Node):
                 self._node_events.pop(node.address, None)
 
     def param_handler(self, params):
-        if not params:
-            LOGGER.warning('CUSTOMPARAMS with no data — keeping existing params')
-            return
-        self._params.load(params)
-        self.poly.Notices.delete('config')
+        if params:
+            self._params.load(params)
+        else:
+            LOGGER.warning("CUSTOMPARAMS with no data — applying defaults")
+
+        defaults = {
+            "host": "unifi.local",
+            "port": "443",
+            "api_key": "",
+            "username": "admin",
+            "password": "",
+            "verify_ssl": "false",
+            "detection_timeout": "300",
+            "watchdog_minutes": "5",
+        }
+        for param, default_value in defaults.items():
+            if param not in self._params:
+                self._params[param] = default_value
+            elif default_value and not str(self._params.get(param, "")).strip():
+                self._params[param] = default_value
+
+        self.poly.Notices.delete("config")
 
         try:
             self.detection_timeout = max(
-                0, int((params.get('detection_timeout') or '300').strip()))
+                0, int((self._params.get("detection_timeout") or "300").strip()))
         except (ValueError, TypeError):
             self.detection_timeout = 300
 
-        host = (params.get('host') or '').strip()
-        api_key = (params.get('api_key') or '').strip()
-        username = (params.get('username') or '').strip()
-        password = (params.get('password') or '').strip()
+        host = (self._params.get("host") or "").strip()
+        api_key = (self._params.get("api_key") or "").strip()
+        username = (self._params.get("username") or "").strip()
+        password = (self._params.get("password") or "").strip()
 
         if not host:
-            self.poly.Notices['config'] = 'Set host in Custom Parameters'
+            self.poly.Notices["config"] = "Set host in Custom Parameters"
             return
         if not api_key and (not username or not password):
-            self.poly.Notices['config'] = (
-                'Set api_key or username and password in Custom Parameters')
+            self.poly.Notices["config"] = (
+                "Set api_key or username and password in Custom Parameters")
             return
 
         if not self._initialized:
