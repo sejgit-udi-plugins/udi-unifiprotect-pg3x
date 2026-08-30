@@ -51,7 +51,7 @@ class Controller(udi_interface.Node):
         self._profile_written = False
 
         polyglot.subscribe(polyglot.CONFIGDONE, self._on_config_done)
-        polyglot.subscribe(polyglot.START, self.start)
+        polyglot.subscribe(polyglot.START, self.start, address)
         polyglot.subscribe(polyglot.CUSTOMPARAMS, self.param_handler)
         polyglot.subscribe(polyglot.CUSTOMDATA, self._customdata_handler)
         polyglot.subscribe(polyglot.POLL, self.poll)
@@ -62,7 +62,10 @@ class Controller(udi_interface.Node):
         polyglot.addNode(self)
 
     def start(self):
-        LOGGER.debug('start() called')
+        LOGGER.info(
+            'Started UniFi Protect NodeServer %s',
+            self.poly.serverdata.get('version', ''),
+        )
         self.poly.updateProfile()
         self.poly.setCustomParamsDoc()
 
