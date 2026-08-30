@@ -5,9 +5,19 @@ Configuration guide for the **UniFi Protect NodeServer** (Polyglot V3 on EISY/Po
 ## Prerequisites
 
 1. UniFi Protect controller (UDM Pro, UDM SE, UCK Gen2+, etc.) on your LAN
-2. UniFi OS 2.0 or later
-3. Either a UniFi **API key** (recommended) or a local admin account on the UniFi controller
+2. UniFi OS 2.0 or later with Protect **5.3+** (Public Integration API)
+3. A UniFi **API key** created under **Control Plane → Integrations**
 4. Smart detection enabled on cameras you want Person/Vehicle/Animal/Package drivers for
+
+## Authentication
+
+This plugin uses Ubiquiti's **Public Integration API** (`/proxy/protect/integration/v1/...`) with an **API key only**. No username or password is stored.
+
+Create the key in the UniFi console:
+
+**UniFi OS → Control Plane → Integrations → API Keys**
+
+API key scoping on UniFi's side is still evolving; use a dedicated integration key rather than a personal admin key when possible.
 
 ## Configuration parameters
 
@@ -21,23 +31,12 @@ IP address or hostname of your UniFi console (the device running Protect).
 
 - **Example:** `192.168.1.1` or `unifi.local`
 
-#### `api_key` (optional)
+#### `api_key`
 
-Official UniFi Protect API key for future official REST endpoints.
+Official UniFi Protect Integration API key.
 
-- Create under **UniFi OS → Control Plane → Integrations → API Keys**
-- **Not sufficient alone** for this plugin: bootstrap, camera discovery, and live WebSocket events still require **username** and **password** session login on current UniFi Protect builds (API key on those private endpoints returns HTTP 500)
-
-#### `username` (required)
-
-Local UniFi OS account username for session authentication.
-
-- Create under **Settings → Admins & Users → Add Admin**
-- **Protect Manager** or **View Only** role is sufficient for detection; doorbell settings need write access
-
-#### `password` (required)
-
-Password for the local UniFi OS account.
+- Sent as the `X-API-KEY` header on REST and WebSocket requests
+- Required — the plugin does not use legacy username/password login
 
 ### Optional
 
@@ -84,31 +83,25 @@ Each Protect camera becomes an ISY node keyed by MAC address (stable across re-a
 - **Vehicle** — vehicle smart detection
 - **Animal** — animal smart detection
 - **Package** — package smart detection
-- **Ring Volume** — doorbell speaker volume (0–100%)
-- **Repeat Times** — ringtone repeat count (1–5)
-- **Ringtone** — current ringtone (names loaded from Protect)
-
-Ring Volume, Repeat Times, and Ringtone apply to cameras with speakers (doorbells).
 
 ### Commands
 
-- **Set Ringtone** — choose ringtone from dropdown (names from Protect)
-- **Set Ring Volume** — set doorbell volume
-- **Set Repeat Times** — set how many times the ringtone plays
-- **Query** — refresh drivers from the Protect API
+- **Query** — refresh connected status from the Protect API
+
+Doorbell ringtone/volume controls are not implemented in this release (detection-focused scope).
 
 ## Controller commands
 
-- **Re-Discover** — re-sync cameras and speaker settings from Protect
+- **Re-Discover** — re-sync cameras from Protect
 - **Query All** — report all controller and camera drivers
 
 ## Troubleshooting
 
 ### No cameras appear
 
-- Confirm `host`, `username`, and `password` in Custom Parameters
-- If you only configured `api_key`, add a local admin **username** and **password** (API key alone cannot reach bootstrap)
-- Check Polyglot logs for login or bootstrap errors
+- Confirm `host` and `api_key` in Custom Parameters
+- Verify Protect 5.3+ and that the API key is active under Integrations
+- Check Polyglot logs for HTTP 401/403 (invalid or revoked key)
 - Run **Re-Discover** from the controller node in Admin Console
 
 ### Detection drivers stuck on
@@ -120,11 +113,6 @@ Ring Volume, Repeat Times, and Ringtone apply to cameras with speakers (doorbell
 
 - Verify the controller is reachable on the configured `host` and `port`
 - Check firewall rules between EISY/Polisy and the UniFi console
-
-### Ringtone dropdown shows "(loading...)"
-
-- Ringtones are fetched on first successful connect and written into the profile
-- Restart the plugin after Protect is online if the list was empty on first run
 
 ## Admin Console note
 

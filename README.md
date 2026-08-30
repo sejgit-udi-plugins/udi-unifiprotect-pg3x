@@ -6,19 +6,17 @@ Repository: [sejgit-udi-plugins/udi-unifiprotect-pg3x](https://github.com/sejgit
 
 ## Features
 
-- Real-time motion and smart detection via WebSocket (no polling delay)
-- Per-camera drivers: Motion, Person, Vehicle, Animal, Package
-- Camera connection state monitoring
-- Doorbell ringtone, ring volume, and repeat times control
-- Ringtone names fetched dynamically from Protect
+- Real-time motion and smart detection via Public Integration API WebSockets
+- Per-camera drivers: Connected, Motion, Person, Vehicle, Animal, Package
+- API-key-only auth (UniFi Protect 5.3+ Integration API)
 - Local API only — no Ubiquiti cloud required
 - aiohttp-only client (FreeBSD / EISY compatible)
 
 ## Requirements
 
 - UniFi Protect controller (UDM Pro, UDM SE, UCK Gen2+, etc.)
-- UniFi OS 2.0+
-- Local admin account on the UniFi controller
+- UniFi OS 2.0+ with Protect **5.3+**
+- Integration API key from **Control Plane → Integrations**
 
 ## Installation
 

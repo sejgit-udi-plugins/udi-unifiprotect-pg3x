@@ -1,7 +1,6 @@
-"""Shared utilities for UniFi Protect NodeServer."""
+"""Utility helpers for UniFi Protect NodeServer."""
 
 from .async_bridge import AsyncBridge
-from .protect_client import ProtectClient
-from .profile import write_profile
+from .protect_client import ProtectClient, camera_address, unwrap_api_payload
 
-__all__ = ['AsyncBridge', 'ProtectClient', 'write_profile']
+__all__ = ['AsyncBridge', 'ProtectClient', 'camera_address', 'unwrap_api_payload']

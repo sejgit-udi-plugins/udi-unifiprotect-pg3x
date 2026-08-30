@@ -1,7 +1,6 @@
 """UniFi Protect controller node."""
 
 import asyncio
-import os
 import threading
 import time
 
@@ -10,13 +9,9 @@ import udi_interface
 
 from nodes.Camera import Camera
 from utils.async_bridge import AsyncBridge
-from utils.profile import write_profile
-from utils.protect_client import ProtectClient
+from utils.protect_client import ProtectClient, camera_address
 
 LOGGER = udi_interface.LOGGER
-
-_PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_PROFILE_DIR = os.path.join(_PLUGIN_DIR, 'profile')
 
 _WATCHDOG_DEFAULT_MIN = 5
 _RESTART_COOLDOWN_SEC = 1800
@@ -36,7 +31,6 @@ class Controller(udi_interface.Node):
         self._async = AsyncBridge()
         self._client = None
         self._cameras = {}
-        self.ringtones = []
         self.detection_timeout = 300
         self._initialized = False
         self._controller_added = False
@@ -48,7 +42,6 @@ class Controller(udi_interface.Node):
         self._watchdog_minutes = _WATCHDOG_DEFAULT_MIN
         self._running = True
         self._connect_lock = threading.Lock()
-        self._profile_written = False
 
         polyglot.subscribe(polyglot.CONFIGDONE, self._on_config_done)
         polyglot.subscribe(polyglot.START, self.start, address)
@@ -125,8 +118,6 @@ class Controller(udi_interface.Node):
             "host": "unifi.local",
             "port": "443",
             "api_key": "",
-            "username": "admin",
-            "password": "",
             "verify_ssl": "false",
             "detection_timeout": "300",
             "watchdog_minutes": "5",
@@ -147,16 +138,12 @@ class Controller(udi_interface.Node):
 
         host = (self._params.get("host") or "").strip()
         api_key = (self._params.get("api_key") or "").strip()
-        username = (self._params.get("username") or "").strip()
-        password = (self._params.get("password") or "").strip()
 
         if not host:
             self.poly.Notices["config"] = "Set host in Custom Parameters"
             return
-        if not username or not password:
-            self.poly.Notices["config"] = (
-                "username and password required (Protect bootstrap/WebSocket "
-                "need session auth; api_key alone is not supported)")
+        if not api_key:
+            self.poly.Notices["config"] = "Set api_key in Custom Parameters"
             return
 
         if not self._initialized:
@@ -164,18 +151,13 @@ class Controller(udi_interface.Node):
 
     def _is_configured(self) -> bool:
         p = self._params
-        host = (p.get('host') or '').strip()
-        user = (p.get('username') or '').strip()
-        passwd = (p.get('password') or '').strip()
-        if host and user and passwd:
+        if (p.get('host') or '').strip() and (p.get('api_key') or '').strip():
             return True
         try:
             cfg = (self.poly.getConfig() or {}).get('customParams') or {}
         except Exception:
             return False
-        if not (cfg.get('host') or '').strip():
-            return False
-        if (cfg.get('username') or '').strip() and (cfg.get('password') or '').strip():
+        if (cfg.get('host') or '').strip() and (cfg.get('api_key') or '').strip():
             LOGGER.warning('Recovered params from PG3 config')
             self._params.load(cfg)
             return True
@@ -190,8 +172,6 @@ class Controller(udi_interface.Node):
         params = self._params
         host = (params.get('host') or '').strip()
         api_key = (params.get('api_key') or '').strip()
-        user = (params.get('username') or '').strip()
-        passwd = (params.get('password') or '').strip()
         port = int((params.get('port') or '443').strip())
         verify = (params.get('verify_ssl') or 'false').strip().lower() == 'true'
         try:
@@ -200,62 +180,42 @@ class Controller(udi_interface.Node):
         except (ValueError, TypeError):
             self._watchdog_minutes = _WATCHDOG_DEFAULT_MIN
 
-        if not host or not user or not passwd:
+        if not host or not api_key:
             LOGGER.warning('Incomplete auth params — not connecting')
             self._initialized = False
             return
 
-        self._async.submit(
-            self._supervisor(host, port, api_key, user, passwd, verify))
+        self._async.submit(self._supervisor(host, port, api_key, verify))
 
-    async def _supervisor(self, host, port, api_key, username, password, verify_ssl):
+    async def _supervisor(self, host, port, api_key, verify_ssl):
         try:
-            await self._supervise(host, port, api_key, username, password, verify_ssl)
+            await self._supervise(host, port, api_key, verify_ssl)
         finally:
             LOGGER.info('Connection supervisor stopped')
             self._initialized = False
 
-    async def _supervise(self, host, port, api_key, username, password, verify_ssl):
+    async def _supervise(self, host, port, api_key, verify_ssl):
         backoff = 5
-        first = True
         while self._running:
             try:
                 LOGGER.info(f'Connecting to UniFi Protect at {host}:{port}')
                 self._client = ProtectClient(
-                    host, port,
-                    api_key=api_key,
-                    username=username,
-                    password=password,
-                    verify_ssl=verify_ssl)
+                    host, port, api_key=api_key, verify_ssl=verify_ssl)
                 await self._client.connect()
 
-                bootstrap = await self._client.get_bootstrap()
-                LOGGER.info('Bootstrap received')
+                cameras = await self._client.get_cameras()
+                LOGGER.info(f'Loaded {len(cameras)} camera(s) from integration API')
 
-                if not self._profile_written:
-                    try:
-                        self.ringtones = await self._client.get_ringtones()
-                        LOGGER.info(f'Ringtones: {[r["name"] for r in self.ringtones]}')
-                    except Exception as e:
-                        LOGGER.warning(f'Could not fetch ringtones: {e}')
-                        self.ringtones = []
-                    write_profile(_PROFILE_DIR, self.ringtones)
-                    self.poly.updateProfile()
-                    self._profile_written = True
-
-                if first:
-                    await asyncio.sleep(2)
-                    first = False
-
-                LOGGER.info('Discovering cameras')
                 await asyncio.get_event_loop().run_in_executor(
-                    None, self._discover_cameras, bootstrap)
+                    None, self._discover_cameras, cameras)
 
-                LOGGER.info('Listening for WebSocket events')
+                LOGGER.info('Listening on integration event/device WebSockets')
                 backoff = 5
-                await self._client.listen(self._on_ws_message,
-                                          on_connect=self._mark_online)
-                LOGGER.warning('WebSocket closed by peer')
+                await self._client.listen(
+                    self._on_integration_event,
+                    self._on_integration_device,
+                    on_connect=self._mark_online)
+                LOGGER.warning('WebSocket subscriptions ended')
                 self._mark_offline('WebSocket closed')
             except asyncio.CancelledError:
                 raise
@@ -310,27 +270,27 @@ class Controller(udi_interface.Node):
         except Exception as e:
             LOGGER.error(f'Self-restart failed: {e}')
 
-    def _discover_cameras(self, bootstrap: dict):
-        cameras = bootstrap.get('cameras') or []
-        if isinstance(cameras, dict):
-            cameras = cameras.values()
+    def _discover_cameras(self, cameras: list):
         for cam in cameras:
             self._ensure_camera(cam)
 
     def _ensure_camera(self, cam: dict):
+        if (cam.get('modelKey') or 'camera') != 'camera':
+            return
         cam_id = cam.get('id', '')
-        mac = cam.get('mac', '')
-        address = mac.lower().replace(':', '')[:14] if mac else cam_id[:14].lower().replace('-', '')
+        address = camera_address(cam)
+        if not address:
+            return
         if address in self._cameras:
-            return self._cameras[address]
+            node = self._cameras[address]
+            node.set_connected(cam.get('state', '') == 'CONNECTED')
+            return node
 
         name = cam.get('name') or cam_id
         node = Camera(self.poly, self.address, address, name, cam_id, self)
         self._add_node_wait(node, timeout=3)
         node.clear_detections()
         node.set_connected(cam.get('state', '') == 'CONNECTED')
-        if cam.get('speakerSettings'):
-            node.set_speaker(cam['speakerSettings'])
         self._cameras[address] = node
         LOGGER.info(f'Added camera: {name} ({address})')
         return node
@@ -341,28 +301,33 @@ class Controller(udi_interface.Node):
                 return node
         return None
 
-    def _on_ws_message(self, action: dict, data: dict):
+    def _on_integration_device(self, message: dict):
         try:
-            model_key = action.get('modelKey', '')
-            act = action.get('action', '')
-
-            if model_key == 'camera':
-                cam_id = action.get('id', '')
-                node = self._node_for_camera(cam_id)
-                if node and 'state' in data:
-                    node.set_connected(data['state'] == 'CONNECTED')
-                elif not node and act == 'add':
-                    LOGGER.info(f'New camera detected ({cam_id}) — resyncing')
-                    self._async.submit(self._resync())
-
-            elif model_key == 'event':
-                self._handle_event(action, data)
-
+            item = message.get('item') or {}
+            if item.get('modelKey') != 'camera':
+                return
+            cam_id = item.get('id', '')
+            node = self._node_for_camera(cam_id)
+            msg_type = message.get('type', '')
+            if node and 'state' in item:
+                node.set_connected(item.get('state') == 'CONNECTED')
+            elif msg_type == 'add' and not node:
+                LOGGER.info(f'New camera detected ({cam_id}) — resyncing')
+                self._async.submit(self._resync())
         except Exception as e:
-            LOGGER.error(f'Error handling WS message: {e}', exc_info=True)
+            LOGGER.error(f'Error handling device message: {e}', exc_info=True)
 
-    def _handle_event(self, action: dict, data: dict):
-        cam_id = data.get('camera') or data.get('cameraId')
+    def _on_integration_event(self, message: dict):
+        try:
+            item = message.get('item') or {}
+            if item.get('modelKey') != 'event':
+                return
+            self._handle_event(message.get('type', ''), item)
+        except Exception as e:
+            LOGGER.error(f'Error handling event message: {e}', exc_info=True)
+
+    def _handle_event(self, change_type: str, data: dict):
+        cam_id = data.get('device') or data.get('camera') or data.get('cameraId')
         if not cam_id:
             return
 
@@ -371,7 +336,10 @@ class Controller(udi_interface.Node):
             return
 
         evt_type = data.get('type', '')
-        is_open = data.get('end') is None
+        if change_type == 'remove':
+            is_open = False
+        else:
+            is_open = data.get('end') is None
 
         if evt_type == 'motion':
             node.set_motion(is_open)
@@ -390,31 +358,20 @@ class Controller(udi_interface.Node):
 
     async def _resync(self):
         try:
-            bootstrap = await self._client.get_bootstrap()
+            cameras = await self._client.get_cameras()
         except aiohttp.ClientResponseError as e:
-            if e.status == 401:
-                try:
-                    LOGGER.info('Resync 401 — creating fresh session')
-                    await self._client.reconnect()
-                    bootstrap = await self._client.get_bootstrap()
-                except Exception as e2:
-                    LOGGER.warning(f'Resync failed after reconnect: {e2}')
-                    return
-            else:
-                LOGGER.warning(f'Resync failed: {e}')
-                return
+            LOGGER.warning(f'Resync failed: {e}')
+            return
         except Exception as e:
             LOGGER.warning(f'Resync failed: {e}')
             return
-        cameras = bootstrap.get('cameras') or []
-        if isinstance(cameras, dict):
-            cameras = cameras.values()
         for cam in cameras:
             node = self._node_for_camera(cam.get('id', ''))
             if node:
                 node.set_connected(cam.get('state', '') == 'CONNECTED')
-                if cam.get('speakerSettings'):
-                    node.set_speaker(cam['speakerSettings'])
+            else:
+                await asyncio.get_event_loop().run_in_executor(
+                    None, self._ensure_camera, cam)
 
     def query(self, command=None):
         self.reportDrivers()

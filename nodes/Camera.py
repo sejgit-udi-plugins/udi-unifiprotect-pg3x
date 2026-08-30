@@ -17,9 +17,6 @@ class Camera(udi_interface.Node):
         {'driver': 'GV3', 'value': 0, 'uom': 2},
         {'driver': 'GV4', 'value': 0, 'uom': 2},
         {'driver': 'GV5', 'value': 0, 'uom': 2},
-        {'driver': 'GV6', 'value': 50, 'uom': 51},
-        {'driver': 'GV7', 'value': 1, 'uom': 56},
-        {'driver': 'GV8', 'value': 0, 'uom': 25},
     ]
 
     DETECTION_DRIVERS = ('GV1', 'GV2', 'GV3', 'GV4', 'GV5')
@@ -80,42 +77,6 @@ class Camera(udi_interface.Node):
         for driver in self.DETECTION_DRIVERS:
             self.setDriver(driver, 0, report=True, force=True)
 
-    def set_speaker(self, speaker: dict):
-        self.setDriver('GV6', speaker.get('ringVolume', 0))
-        self.setDriver('GV7', speaker.get('repeatTimes', 1))
-        ringtone_id = speaker.get('ringtoneId', '')
-        ringtones = self._ctrl.ringtones if self._ctrl else []
-        idx = next((i for i, r in enumerate(ringtones) if r.get('id') == ringtone_id), 0)
-        self.setDriver('GV8', idx)
-
-    def _patch(self, payload: dict):
-        if self._ctrl and self._ctrl._client:
-            self._ctrl._async.submit(
-                self._ctrl._client.patch_camera(self.camera_id, payload))
-
-    def cmd_set_ringtone(self, command):
-        idx = int(command.get('value', 0))
-        ringtones = self._ctrl.ringtones
-        if idx < len(ringtones):
-            ringtone_id = ringtones[idx]['id']
-            self._patch({'speakerSettings': {'ringtoneId': ringtone_id}})
-            self.setDriver('GV8', idx)
-            LOGGER.info(f'{self.name}: set ringtone → {ringtones[idx]["name"]}')
-        else:
-            LOGGER.warning(f'{self.name}: ringtone index {idx} out of range')
-
-    def cmd_set_ring_vol(self, command):
-        vol = int(command.get('value', 0))
-        self._patch({'speakerSettings': {'ringVolume': vol}})
-        self.setDriver('GV6', vol)
-        LOGGER.info(f'{self.name}: set ring volume → {vol}')
-
-    def cmd_set_repeat(self, command):
-        times = int(command.get('value', 1))
-        self._patch({'speakerSettings': {'repeatTimes': times}})
-        self.setDriver('GV7', times)
-        LOGGER.info(f'{self.name}: set repeat times → {times}')
-
     def query(self, command=None):
         if self._ctrl and self._ctrl._client:
             self._ctrl._async.submit(self._refresh())
@@ -125,8 +86,7 @@ class Camera(udi_interface.Node):
     async def _refresh(self):
         try:
             cam = await self._ctrl._client.get_camera(self.camera_id)
-            if cam.get('speakerSettings'):
-                self.set_speaker(cam['speakerSettings'])
+            self.set_connected(cam.get('state', '') == 'CONNECTED')
             self.reportDrivers()
         except Exception as e:
             LOGGER.warning(f'{self.name}: query refresh failed: {e}')
@@ -134,7 +94,4 @@ class Camera(udi_interface.Node):
 
     commands = {
         'QUERY': query,
-        'SET_RINGTONE': cmd_set_ringtone,
-        'SET_RING_VOL': cmd_set_ring_vol,
-        'SET_REPEAT': cmd_set_repeat,
     }
