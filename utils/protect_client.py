@@ -46,10 +46,21 @@ class ProtectClient:
         self._session = aiohttp.ClientSession(
             cookie_jar=aiohttp.DummyCookieJar(),
             timeout=aiohttp.ClientTimeout(total=None, connect=10, sock_connect=10))
-        if self.api_key:
-            LOGGER.info('Using X-API-KEY authentication')
-        else:
+        if self.username and self.password:
             await self._login()
+            if self.api_key:
+                LOGGER.info(
+                    'Session login for bootstrap/WebSocket (X-API-KEY stored but '
+                    'not used on private Protect endpoints)')
+            else:
+                LOGGER.info('Using username/password session authentication')
+        elif self.api_key:
+            LOGGER.warning(
+                'X-API-KEY alone cannot access /proxy/protect/api/bootstrap or '
+                'WebSocket updates (Protect returns HTTP 500). Add username and '
+                'password for session authentication.')
+        else:
+            raise RuntimeError('No authentication configured')
 
     async def _login(self):
         resp = await self._session.post(
@@ -73,9 +84,15 @@ class ProtectClient:
         LOGGER.info(f'Login: TOKEN={"found" if self._auth_cookie else "NOT FOUND"}, '
                     f'CSRF={"found" if self._csrf_token else "not found"}')
 
-    def _headers(self) -> dict:
+    def _headers(self, *, private_api: bool = False) -> dict:
+        """Build request headers.
+
+        UniFi Protect private endpoints (bootstrap, WebSocket, legacy REST)
+        require a session cookie. Sending X-API-KEY on those paths returns
+        HTTP 500 even when a valid API key is configured.
+        """
         h = {}
-        if self.api_key:
+        if self.api_key and not (private_api and self._auth_cookie):
             h['X-API-KEY'] = self.api_key
         if self._auth_cookie:
             h['Cookie'] = self._auth_cookie
@@ -84,9 +101,13 @@ class ProtectClient:
         return h
 
     async def get_bootstrap(self) -> dict:
+        if not self._auth_cookie:
+            raise RuntimeError(
+                'Protect bootstrap requires username/password session auth; '
+                'api_key alone is not supported')
         resp = await self._session.get(
             self._url('/proxy/protect/api/bootstrap'),
-            headers=self._headers(),
+            headers=self._headers(private_api=True),
             ssl=self._ssl,
         )
         resp.raise_for_status()
@@ -95,8 +116,14 @@ class ProtectClient:
         return data
 
     async def listen(self, on_message, on_connect=None):
+        if not self._auth_cookie:
+            raise RuntimeError(
+                'Protect WebSocket requires username/password session auth; '
+                'api_key alone is not supported')
         async with self._session.ws_connect(
-                self._ws_url(), headers=self._headers(), ssl=self._ssl) as ws:
+                self._ws_url(),
+                headers=self._headers(private_api=True),
+                ssl=self._ssl) as ws:
             if on_connect:
                 on_connect()
             async for msg in ws:
@@ -114,31 +141,31 @@ class ProtectClient:
     async def get_ringtones(self) -> list:
         resp = await self._session.get(
             self._url('/proxy/protect/api/ringtones'),
-            headers=self._headers(), ssl=self._ssl)
+            headers=self._headers(private_api=True), ssl=self._ssl)
         resp.raise_for_status()
         return await resp.json()
 
     async def get_camera(self, camera_id: str) -> dict:
         resp = await self._session.get(
             self._url(f'/proxy/protect/api/cameras/{camera_id}'),
-            headers=self._headers(), ssl=self._ssl)
+            headers=self._headers(private_api=True), ssl=self._ssl)
         resp.raise_for_status()
         return await resp.json()
 
     async def patch_camera(self, camera_id: str, payload: dict):
         resp = await self._session.patch(
             self._url(f'/proxy/protect/api/cameras/{camera_id}'),
-            headers=self._headers(), ssl=self._ssl, json=payload)
+            headers=self._headers(private_api=True), ssl=self._ssl, json=payload)
         if resp.status == 401:
             LOGGER.warning('patch_camera: 401 — reconnecting and retrying')
             await self.reconnect()
             resp = await self._session.patch(
                 self._url(f'/proxy/protect/api/cameras/{camera_id}'),
-                headers=self._headers(), ssl=self._ssl, json=payload)
+                headers=self._headers(private_api=True), ssl=self._ssl, json=payload)
         resp.raise_for_status()
 
     async def refresh_token(self):
-        if self.api_key:
+        if not (self.username and self.password):
             return
         await self._login()
         LOGGER.info('Auth token refreshed')

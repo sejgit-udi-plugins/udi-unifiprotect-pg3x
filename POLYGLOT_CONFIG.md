@@ -21,23 +21,23 @@ IP address or hostname of your UniFi console (the device running Protect).
 
 - **Example:** `192.168.1.1` or `unifi.local`
 
-#### `api_key` (recommended)
+#### `api_key` (optional)
 
-Official UniFi Protect API key. Sent as the `X-API-KEY` header on every request.
+Official UniFi Protect API key for future official REST endpoints.
 
 - Create under **UniFi OS → Control Plane → Integrations → API Keys**
-- When set, `username` and `password` are not required
+- **Not sufficient alone** for this plugin: bootstrap, camera discovery, and live WebSocket events still require **username** and **password** session login on current UniFi Protect builds (API key on those private endpoints returns HTTP 500)
 
-#### `username`
+#### `username` (required)
 
-Local UniFi OS account username (legacy auth when `api_key` is not set).
+Local UniFi OS account username for session authentication.
 
 - Create under **Settings → Admins & Users → Add Admin**
 - **Protect Manager** or **View Only** role is sufficient for detection; doorbell settings need write access
 
-#### `password`
+#### `password` (required)
 
-Password for the local UniFi OS account (legacy auth when `api_key` is not set).
+Password for the local UniFi OS account.
 
 ### Optional
 
@@ -107,6 +107,7 @@ Ring Volume, Repeat Times, and Ringtone apply to cameras with speakers (doorbell
 ### No cameras appear
 
 - Confirm `host`, `username`, and `password` in Custom Parameters
+- If you only configured `api_key`, add a local admin **username** and **password** (API key alone cannot reach bootstrap)
 - Check Polyglot logs for login or bootstrap errors
 - Run **Re-Discover** from the controller node in Admin Console
 

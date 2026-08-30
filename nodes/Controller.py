@@ -153,9 +153,10 @@ class Controller(udi_interface.Node):
         if not host:
             self.poly.Notices["config"] = "Set host in Custom Parameters"
             return
-        if not api_key and (not username or not password):
+        if not username or not password:
             self.poly.Notices["config"] = (
-                "Set api_key or username and password in Custom Parameters")
+                "username and password required (Protect bootstrap/WebSocket "
+                "need session auth; api_key alone is not supported)")
             return
 
         if not self._initialized:
@@ -164,11 +165,9 @@ class Controller(udi_interface.Node):
     def _is_configured(self) -> bool:
         p = self._params
         host = (p.get('host') or '').strip()
-        if not host:
-            return False
-        if (p.get('api_key') or '').strip():
-            return True
-        if ((p.get('username') or '').strip() and (p.get('password') or '').strip()):
+        user = (p.get('username') or '').strip()
+        passwd = (p.get('password') or '').strip()
+        if host and user and passwd:
             return True
         try:
             cfg = (self.poly.getConfig() or {}).get('customParams') or {}
@@ -176,11 +175,7 @@ class Controller(udi_interface.Node):
             return False
         if not (cfg.get('host') or '').strip():
             return False
-        if (cfg.get('api_key') or '').strip():
-            LOGGER.warning('Recovered params from PG3 config')
-            self._params.load(cfg)
-            return True
-        if ((cfg.get('username') or '').strip() and (cfg.get('password') or '').strip()):
+        if (cfg.get('username') or '').strip() and (cfg.get('password') or '').strip():
             LOGGER.warning('Recovered params from PG3 config')
             self._params.load(cfg)
             return True
@@ -205,7 +200,7 @@ class Controller(udi_interface.Node):
         except (ValueError, TypeError):
             self._watchdog_minutes = _WATCHDOG_DEFAULT_MIN
 
-        if not host or (not api_key and (not user or not passwd)):
+        if not host or not user or not passwd:
             LOGGER.warning('Incomplete auth params — not connecting')
             self._initialized = False
             return
