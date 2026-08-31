@@ -9,6 +9,7 @@ import udi_interface
 
 from utils.binary_detect import set_binary_detection
 from utils.camera_caps import camera_supports_smart_type
+from utils.cmd_pairs import CONNECTED
 from utils.camera_layouts import (
     CAMERA_DRIVERS,
     DETECTION_DRIVERS_BY_NODEDEF,
@@ -74,7 +75,7 @@ class Camera(udi_interface.Node):
             self,
             'ST',
             connected,
-            cmd_pair=None,
+            cmd_pair=CONNECTED,
             timers=self._timers,
             timer_lock=self._timer_lock,
             timeout_sec=0,

@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## 1.5.2
+
+- Complete NLS command names for all nodedefs (fixes missing Control triggers on AI+Audio cameras)
+- Add CONNECTED/DISCONNECTED control commands for online/offline transitions
+- Add profile test ensuring every send command has an ISY program label
+
 ## 1.5.1
 
 - Fix line crossing ignored on public API cameras (``hasLineCrossing`` omitted from featureFlags)

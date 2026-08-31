@@ -9,6 +9,7 @@ import udi_interface
 
 from utils import sensor_state
 from utils.binary_detect import set_binary_detection
+from utils.cmd_pairs import CONNECTED
 from utils.sensor_layouts import SENSOR_DRIVERS, SENSOR_LAYOUTS
 from utils.temperature import celsius_to_display, temp_uom
 
@@ -109,7 +110,7 @@ class Sensor(udi_interface.Node):
                 self,
                 'ST',
                 connected,
-                cmd_pair=None,
+                cmd_pair=CONNECTED,
                 timers=self._timers,
                 timer_lock=self._timer_lock,
                 timeout_sec=0,

@@ -25,6 +25,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="PERSON"/><cmd id="NOPERSON"/>
         <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
@@ -49,6 +50,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="PERSON"/><cmd id="NOPERSON"/>
         <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
@@ -85,6 +87,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="PERSON"/><cmd id="NOPERSON"/>
         <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
@@ -120,6 +123,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="PERSON"/><cmd id="NOPERSON"/>
         <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
@@ -141,6 +145,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="OPEN"/><cmd id="CLOSED"/>
         <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
       </sends>
@@ -156,6 +161,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
       </sends>
@@ -171,6 +177,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="LEAK"/><cmd id="NOLEAK"/>
         <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
       </sends>
@@ -187,6 +194,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="GLASS"/><cmd id="NOGLASS"/>
         <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
@@ -210,6 +218,7 @@
     </sts>
     <cmds>
       <sends>
+        <cmd id="CONNECTED"/><cmd id="DISCONNECTED"/>
         <cmd id="MOTION"/><cmd id="NOMOTION"/>
         <cmd id="OPEN"/><cmd id="CLOSED"/>
         <cmd id="LEAK"/><cmd id="NOLEAK"/>

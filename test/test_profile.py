@@ -60,6 +60,19 @@ def test_controller_commands_match_python():
     assert nodedefs[CONTROLLER_NODEDEF]["accepts"] == CONTROLLER_COMMANDS
 
 
+def test_send_commands_have_nls_names():
+    """Every nodedef send command needs a CMD NLS label for ISY program Control triggers."""
+    nodedefs = _parse_nodedefs()
+    nls = (PROFILE / "nls" / "en_us.txt").read_text()
+    missing = []
+    for node_id, cmds in nodedefs.items():
+        for cmd in cmds["sends"]:
+            key = f"CMD-{node_id}-{cmd}-NAME"
+            if key not in nls:
+                missing.append(key)
+    assert not missing, f"Missing NLS command names: {sorted(missing)}"
+
+
 def test_status_editors_exist():
     editors = _editor_ids()
     tree = ET.parse(NODEDEFS)

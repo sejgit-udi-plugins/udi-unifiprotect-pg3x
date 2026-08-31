@@ -144,6 +144,12 @@ Supported event types from the public API include `motion`, `smartDetectZone`, `
 
 Doorbell ringtone/volume and Alarm Manager arm/disarm are **not** implemented (read-only plugin; deferred until public API support).
 
+### ISY programs: Status vs Control
+
+Each detection updates a **Status** driver (e.g. Person = on/off). Programs can also trigger on **Control** commands (e.g. `Person Detected`, `Line Crossing`) emitted on transitions — use **Control → is received** in the program editor, not **Status → changes**.
+
+After upgrading the profile, reinstall the NodeServer on EISY so new control commands appear in the program picker.
+
 ## Scope
 
 - **Public Integration API only** — grows as Ubiquiti expands the official API
