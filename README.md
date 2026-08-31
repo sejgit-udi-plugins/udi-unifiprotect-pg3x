@@ -1,8 +1,8 @@
-# UniFi Protect PG3x NodeServer
+# Unifi Protect api
 
-NodeServer for Universal Devices **EISY** or **Polisy** (Polyglot V3) that integrates UniFi Protect cameras and sensors with the ISY/IoX home automation controller.
+NodeServer for Universal Devices **EISY** or **Polisy** (Polyglot V3). UniFi Protect api integration of cameras and USL/UP Sense sensors — detection events for ISY programs.
 
-Repository: [sejgit-udi-plugins/udi-unifiprotect-pg3x](https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x)
+Repository: [sejgit-udi-plugins/udi-unifiprotectapi-pg3x](https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x)
 
 ## Scope and design
 
@@ -35,8 +35,8 @@ This plugin is built exclusively on Ubiquiti's **Public Integration API** (API-k
 
 Add the NodeServer in PG3x:
 
-- **GitHub URL:** `https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x`
-- **Executable:** `udi-unifiprotect-pg3x.py`
+- **GitHub URL:** `https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x`
+- **Executable:** `udi-unifiprotectapi-pg3x.py`
 
 After upgrading to v1.5+, reinstall the NodeServer profile on EISY so new capability-based nodedefs are loaded, then run **Re-Discover**.
 
@@ -51,7 +51,7 @@ make lint       # ruff
 make fulltest   # pre-commit on all files
 ```
 
-Version bumps: edit `VERSION` in `udi-unifiprotect-pg3x.py`, update `CHANGELOG.md`, then `make sync-version`.
+Version bumps: edit `VERSION` in `udi-unifiprotectapi-pg3x.py`, update `CHANGELOG.md`, then `make sync-version`.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full release workflow.
 
 ## License

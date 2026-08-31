@@ -22,7 +22,7 @@ repos:
     hooks:
       - id: sync-version
         name: Sync profile/version.txt and server.json from VERSION
-        entry: uv run python scripts/sync_version.py --entry udi-unifiprotect-pg3x.py
+        entry: uv run python scripts/sync_version.py --entry udi-unifiprotectapi-pg3x.py
         language: system
         pass_filenames: false
         files: '(udi-.*\.py|server\.json)$'

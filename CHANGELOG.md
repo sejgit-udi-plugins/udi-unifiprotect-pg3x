@@ -7,6 +7,7 @@ All notable changes to this project are documented here.
 - Complete NLS command names for all nodedefs (fixes missing Control triggers on AI+Audio cameras)
 - Add CONNECTED/DISCONNECTED control commands for online/offline transitions
 - Add profile test ensuring every send command has an ISY program label
+- Rename project to **Unifi Protect api** (`udi-unifiprotectapi-pg3x`)
 
 ## 1.5.1
 

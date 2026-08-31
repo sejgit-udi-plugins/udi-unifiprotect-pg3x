@@ -1,5 +1,5 @@
 [project]
-name = "udi-unifiprotect-pg3x"
+name = "udi-unifiprotectapi-pg3x"
 version = "0.0.1"
 requires-python = ">=3.11"
 dependencies = [

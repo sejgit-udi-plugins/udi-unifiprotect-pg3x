@@ -1,5 +1,5 @@
-NAME = UniFi-Protect
-ENTRY = udi-unifiprotect-pg3x.py
+NAME = UniFi-Protect-API
+ENTRY = udi-unifiprotectapi-pg3x.py
 XML_FILES = profile/*/*.xml
 
 .PHONY: all check clean format fulltest install install-eisy lint test coverage coverage-html coverage-report zip sync-version

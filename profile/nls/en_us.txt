@@ -1,5 +1,5 @@
 # Node Server Names
-ND-unifi_controller-NAME = UniFi Protect Controller
+ND-unifi_controller-NAME = Unifi Protect api Controller
 ND-unifi_camera_detect-NAME = UniFi Camera (Detect)
 ND-unifi_camera_ai-NAME = UniFi Camera (AI)
 ND-unifi_camera_ai_audio-NAME = UniFi Camera (AI + Audio)

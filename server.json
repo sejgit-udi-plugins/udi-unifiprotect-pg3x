@@ -1,10 +1,10 @@
 {
-    "name": "UniFi Protect",
-    "docs": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x",
+    "name": "Unifi Protect api",
+    "docs": "https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x",
     "type": "python3",
-    "executable": "udi-unifiprotect-pg3x.py",
+    "executable": "udi-unifiprotectapi-pg3x.py",
     "install": "install.sh",
-    "description": "UniFi Protect cameras as motion and smart detection sensors for ISY. Detects people, vehicles, animals, and packages in real time.",
+    "description": "UniFi Protect api integration of cameras and USL/UP Sense sensors \u2014 detection events for ISY programs.",
     "shortPoll": "60",
     "longPoll": "300",
     "logLevel": "INFO",
@@ -19,12 +19,12 @@
     },
     "credits": [
         {
-            "title": "UniFi Protect NodeServer",
+            "title": "Unifi Protect api",
             "author": "Stephen Jenkins",
             "version": "1.5.2",
             "date": "August 2026",
-            "source": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x",
-            "license": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x/blob/main/LICENSE"
+            "source": "https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x",
+            "license": "https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x/blob/main/LICENSE"
         }
     ]
 }

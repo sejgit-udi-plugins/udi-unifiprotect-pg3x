@@ -11,7 +11,7 @@ PROFILE = ROOT / "profile"
 NODEDEFS = PROFILE / "nodedef" / "nodedefs.xml"
 EDITORS = PROFILE / "editor" / "editors.xml"
 VERSION_FILE = PROFILE / "version.txt"
-ENTRY = ROOT / "udi-unifiprotect-pg3x.py"
+ENTRY = ROOT / "udi-unifiprotectapi-pg3x.py"
 
 CONTROLLER_COMMANDS = {"QUERY", "DISCOVER"}
 CONTROLLER_NODEDEF = "unifi_controller"

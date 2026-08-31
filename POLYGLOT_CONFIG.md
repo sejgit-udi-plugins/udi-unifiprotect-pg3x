@@ -1,6 +1,6 @@
-# UniFi Protect — Polyglot Configuration
+# Unifi Protect api — Polyglot Configuration
 
-Configuration guide for the **UniFi Protect NodeServer** (Polyglot V3 on EISY/Polisy).
+Configuration guide for the **Unifi Protect api** NodeServer (Polyglot V3 on EISY/Polisy).
 
 ## Prerequisites
 

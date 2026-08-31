@@ -23,7 +23,7 @@ if __name__ == "__main__":
     try:
         polyglot = udi_interface.Interface([])
         polyglot.start(VERSION)
-        Controller(polyglot, "controller", "controller", "UniFi Protect")
+        Controller(polyglot, "controller", "controller", "Unifi Protect api")
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         udi_interface.LOGGER.warning("Received interrupt or exit...")

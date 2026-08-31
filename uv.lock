@@ -1168,7 +1168,7 @@ wheels = [
 ]
 
 [[package]]
-name = "udi-unifiprotect-pg3x"
+name = "udi-unifiprotectapi-pg3x"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
