@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## 1.5.0
+
+- Capability-based camera nodedefs: detect, AI (face/LPR/line), AI+audio, doorbell
+- Expand camera events: line crossing, audio detections (smoke, CO, siren, etc.), doorbell ring
+- Capability-based sensor nodedefs: contact, motion, leak, glass, environmental — no unused drivers at 0
+- Add `temperature_units` config (C or F; default F) for UP Sense environmental sensors
+- Detection and sensor state changes emit ISY control commands (`reportCmd`) for program triggers
+- Document Public API scope, read-only design, and Global Alarm Manager alignment in README
+
 ## 1.3.2
 
 - Fix sensor live updates dropped after partial WebSocket messages recalculated capabilities

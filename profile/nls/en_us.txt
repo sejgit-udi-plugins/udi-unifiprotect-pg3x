@@ -1,7 +1,14 @@
 # Node Server Names
 ND-unifi_controller-NAME = UniFi Protect Controller
-ND-unifi_camera-NAME = UniFi Camera
-ND-unifi_sensor-NAME = UniFi Sensor
+ND-unifi_camera_detect-NAME = UniFi Camera (Detect)
+ND-unifi_camera_ai-NAME = UniFi Camera (AI)
+ND-unifi_camera_ai_audio-NAME = UniFi Camera (AI + Audio)
+ND-unifi_camera_doorbell-NAME = UniFi Doorbell
+ND-unifi_sensor_contact-NAME = UniFi Contact Sensor
+ND-unifi_sensor_motion-NAME = UniFi Motion Sensor
+ND-unifi_sensor_leak-NAME = UniFi Leak Sensor
+ND-unifi_sensor_glass-NAME = UniFi Glass Break Sensor
+ND-unifi_sensor_env-NAME = UniFi Environmental Sensor
 
 # Controller Drivers
 ST-unifi_controller-ST-NAME = Status
@@ -10,28 +17,137 @@ ST-unifi_controller-ST-NAME = Status
 CMD-unifi_controller-DISCOVER-NAME = Re-Discover
 CMD-unifi_controller-QUERY-NAME = Query All
 
-# Camera Drivers
-ST-unifi_camera-ST-NAME = Connected
-ST-unifi_camera-GV1-NAME = Motion
-ST-unifi_camera-GV2-NAME = Person
-ST-unifi_camera-GV3-NAME = Vehicle
-ST-unifi_camera-GV4-NAME = Animal
-ST-unifi_camera-GV5-NAME = Package
+# Camera — basic detect
+ST-unifi_camera_detect-ST-NAME = Connected
+ST-unifi_camera_detect-GV1-NAME = Motion
+ST-unifi_camera_detect-GV2-NAME = Person
+ST-unifi_camera_detect-GV3-NAME = Vehicle
+ST-unifi_camera_detect-GV4-NAME = Animal
+ST-unifi_camera_detect-GV5-NAME = Package
+CMD-unifi_camera_detect-QUERY-NAME = Query
+CMD-unifi_camera_detect-MOTION-NAME = Motion Detected
+CMD-unifi_camera_detect-NOMOTION-NAME = Motion Cleared
+CMD-unifi_camera_detect-PERSON-NAME = Person Detected
+CMD-unifi_camera_detect-NOPERSON-NAME = Person Cleared
+CMD-unifi_camera_detect-VEHICLE-NAME = Vehicle Detected
+CMD-unifi_camera_detect-NOVEHICLE-NAME = Vehicle Cleared
+CMD-unifi_camera_detect-ANIMAL-NAME = Animal Detected
+CMD-unifi_camera_detect-NOANIMAL-NAME = Animal Cleared
+CMD-unifi_camera_detect-PACKAGE-NAME = Package Detected
+CMD-unifi_camera_detect-NOPACKAGE-NAME = Package Cleared
 
-# Camera Commands
-CMD-unifi_camera-QUERY-NAME = Query
+# Camera — AI
+ST-unifi_camera_ai-ST-NAME = Connected
+ST-unifi_camera_ai-GV1-NAME = Motion
+ST-unifi_camera_ai-GV2-NAME = Person
+ST-unifi_camera_ai-GV3-NAME = Vehicle
+ST-unifi_camera_ai-GV4-NAME = Animal
+ST-unifi_camera_ai-GV5-NAME = Package
+ST-unifi_camera_ai-GV6-NAME = Face
+ST-unifi_camera_ai-GV7-NAME = License Plate
+ST-unifi_camera_ai-GV8-NAME = Line Crossing
+CMD-unifi_camera_ai-QUERY-NAME = Query
+CMD-unifi_camera_ai-MOTION-NAME = Motion Detected
+CMD-unifi_camera_ai-NOMOTION-NAME = Motion Cleared
+CMD-unifi_camera_ai-PERSON-NAME = Person Detected
+CMD-unifi_camera_ai-NOPERSON-NAME = Person Cleared
+CMD-unifi_camera_ai-VEHICLE-NAME = Vehicle Detected
+CMD-unifi_camera_ai-NOVEHICLE-NAME = Vehicle Cleared
+CMD-unifi_camera_ai-ANIMAL-NAME = Animal Detected
+CMD-unifi_camera_ai-NOANIMAL-NAME = Animal Cleared
+CMD-unifi_camera_ai-PACKAGE-NAME = Package Detected
+CMD-unifi_camera_ai-NOPACKAGE-NAME = Package Cleared
+CMD-unifi_camera_ai-FACE-NAME = Face Detected
+CMD-unifi_camera_ai-NOFACE-NAME = Face Cleared
+CMD-unifi_camera_ai-LPR-NAME = License Plate Detected
+CMD-unifi_camera_ai-NOLPR-NAME = License Plate Cleared
+CMD-unifi_camera_ai-LINE-NAME = Line Crossing
+CMD-unifi_camera_ai-NOLINE-NAME = Line Crossing Cleared
 
-# Sensor Drivers
-ST-unifi_sensor-ST-NAME = Connected
-ST-unifi_sensor-GV1-NAME = Motion
-ST-unifi_sensor-GV2-NAME = Contact Open
-ST-unifi_sensor-GV3-NAME = Leak
-ST-unifi_sensor-GV4-NAME = Tamper
-ST-unifi_sensor-GV5-NAME = Alarm
-ST-unifi_sensor-GV6-NAME = Glass Break
-ST-unifi_sensor-CV1-NAME = Temperature
-ST-unifi_sensor-CV2-NAME = Humidity
-ST-unifi_sensor-CV3-NAME = Light Level
+# Camera — AI + audio
+ST-unifi_camera_ai_audio-ST-NAME = Connected
+ST-unifi_camera_ai_audio-GV1-NAME = Motion
+ST-unifi_camera_ai_audio-GV2-NAME = Person
+ST-unifi_camera_ai_audio-GV3-NAME = Vehicle
+ST-unifi_camera_ai_audio-GV4-NAME = Animal
+ST-unifi_camera_ai_audio-GV5-NAME = Package
+ST-unifi_camera_ai_audio-GV6-NAME = Face
+ST-unifi_camera_ai_audio-GV7-NAME = License Plate
+ST-unifi_camera_ai_audio-GV8-NAME = Line Crossing
+ST-unifi_camera_ai_audio-GV9-NAME = Smoke Alarm
+ST-unifi_camera_ai_audio-GV10-NAME = CO Alarm
+ST-unifi_camera_ai_audio-GV11-NAME = Siren
+ST-unifi_camera_ai_audio-GV12-NAME = Baby Cry
+ST-unifi_camera_ai_audio-GV13-NAME = Car Horn
+ST-unifi_camera_ai_audio-GV14-NAME = Glass Break
+ST-unifi_camera_ai_audio-GV15-NAME = Speaking
+ST-unifi_camera_ai_audio-GV16-NAME = Barking
+ST-unifi_camera_ai_audio-GV17-NAME = Car Alarm
+CMD-unifi_camera_ai_audio-QUERY-NAME = Query
 
-# Sensor Commands
-CMD-unifi_sensor-QUERY-NAME = Query
+# Camera — doorbell
+ST-unifi_camera_doorbell-ST-NAME = Connected
+ST-unifi_camera_doorbell-GV1-NAME = Motion
+ST-unifi_camera_doorbell-GV2-NAME = Person
+ST-unifi_camera_doorbell-GV3-NAME = Vehicle
+ST-unifi_camera_doorbell-GV4-NAME = Animal
+ST-unifi_camera_doorbell-GV5-NAME = Package
+ST-unifi_camera_doorbell-GV6-NAME = Face
+ST-unifi_camera_doorbell-GV18-NAME = Ring
+CMD-unifi_camera_doorbell-QUERY-NAME = Query
+CMD-unifi_camera_doorbell-RING-NAME = Doorbell Ring
+CMD-unifi_camera_doorbell-NORING-NAME = Doorbell Ring Cleared
+
+# Sensor — contact
+ST-unifi_sensor_contact-ST-NAME = Connected
+ST-unifi_sensor_contact-GV1-NAME = Contact Open
+ST-unifi_sensor_contact-GV2-NAME = Tamper
+CMD-unifi_sensor_contact-QUERY-NAME = Query
+CMD-unifi_sensor_contact-OPEN-NAME = Open
+CMD-unifi_sensor_contact-CLOSED-NAME = Closed
+CMD-unifi_sensor_contact-TAMPER-NAME = Tamper
+CMD-unifi_sensor_contact-NOTAMPER-NAME = Tamper Cleared
+
+# Sensor — motion
+ST-unifi_sensor_motion-ST-NAME = Connected
+ST-unifi_sensor_motion-GV1-NAME = Motion
+ST-unifi_sensor_motion-GV2-NAME = Tamper
+CMD-unifi_sensor_motion-QUERY-NAME = Query
+CMD-unifi_sensor_motion-MOTION-NAME = Motion Detected
+CMD-unifi_sensor_motion-NOMOTION-NAME = Motion Cleared
+
+# Sensor — leak
+ST-unifi_sensor_leak-ST-NAME = Connected
+ST-unifi_sensor_leak-GV1-NAME = Leak
+ST-unifi_sensor_leak-GV2-NAME = Tamper
+CMD-unifi_sensor_leak-QUERY-NAME = Query
+CMD-unifi_sensor_leak-LEAK-NAME = Leak Detected
+CMD-unifi_sensor_leak-NOLEAK-NAME = Leak Cleared
+
+# Sensor — glass
+ST-unifi_sensor_glass-ST-NAME = Connected
+ST-unifi_sensor_glass-GV1-NAME = Motion
+ST-unifi_sensor_glass-GV2-NAME = Glass Break
+ST-unifi_sensor_glass-GV3-NAME = Tamper
+CMD-unifi_sensor_glass-QUERY-NAME = Query
+CMD-unifi_sensor_glass-GLASS-NAME = Glass Break
+CMD-unifi_sensor_glass-NOGLASS-NAME = Glass Break Cleared
+
+# Sensor — environmental
+ST-unifi_sensor_env-ST-NAME = Connected
+ST-unifi_sensor_env-GV1-NAME = Motion
+ST-unifi_sensor_env-GV2-NAME = Contact Open
+ST-unifi_sensor_env-GV3-NAME = Leak
+ST-unifi_sensor_env-GV4-NAME = Tamper
+ST-unifi_sensor_env-GV5-NAME = Alarm
+ST-unifi_sensor_env-GV6-NAME = Glass Break
+ST-unifi_sensor_env-CV1-NAME = Temperature
+ST-unifi_sensor_env-CV2-NAME = Humidity
+ST-unifi_sensor_env-CV3-NAME = Light Level
+CMD-unifi_sensor_env-QUERY-NAME = Query
+CMD-unifi_sensor_env-OPEN-NAME = Open
+CMD-unifi_sensor_env-CLOSED-NAME = Closed
+CMD-unifi_sensor_env-LEAK-NAME = Leak Detected
+CMD-unifi_sensor_env-NOLEAK-NAME = Leak Cleared
+CMD-unifi_sensor_env-ALARM-NAME = Alarm
+CMD-unifi_sensor_env-NOALARM-NAME = Alarm Cleared

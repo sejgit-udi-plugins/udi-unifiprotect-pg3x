@@ -71,31 +71,51 @@ Minutes of sustained connection failure before the plugin restarts itself as a l
 
 Brief network blips are retried automatically; a Polyglot notice appears after about one minute offline.
 
+#### `temperature_units`
+
+Display unit for environmental sensor temperature (UP Sense).
+
+- **Default:** `F` (Fahrenheit, ISY uom 17)
+- **Alternative:** `C` (Celsius, ISY uom 4)
+
+Protect always reports temperature in Celsius; the plugin converts for display when `F` is selected.
+
 ## Sensor nodes (USL Gateway / UP Sense)
 
-Each adopted Protect sensor becomes an ISY node keyed by MAC address. Drivers are created from the sensor **capability map** (`featureFlags`) when Protect provides it; older firmware falls back to mount type and settings.
+Each adopted Protect sensor becomes an ISY node keyed by MAC address. The plugin picks a **capability-based nodedef** so only relevant drivers appear (no unused slots stuck at 0).
 
-### Binary drivers
+| Nodedef | Typical hardware |
+|---|---|
+| **Contact** | USL Entry, UP Sense door/window |
+| **Motion** | Standalone PIR |
+| **Leak** | Leak sensor |
+| **Glass Break** | USL Glass Break |
+| **Environmental** | UP Sense multi-sensor (temp, humidity, light, contact, leak, etc.) |
 
-| Driver | Meaning | Typical hardware |
-|---|---|---|
-| **Connected** | Sensor online | All |
-| **Motion** | PIR motion active | Motion, Environmental, Glass Break |
-| **Contact Open** | Door/window/garage open | Entry, UP Sense contact |
-| **Leak** | Internal or external leak detected | Leak, Environmental |
-| **Tamper** | Tamper switch triggered | Most USL sensors |
-| **Alarm** | Smoke/CO alarm sound detected | UP Sense (when enabled) |
-| **Glass Break** | Glass-break event (events stream) | USL Glass Break |
+Drivers are mapped from the sensor **capability map** (`featureFlags`) when Protect provides it; older firmware falls back to mount type and settings.
 
-### Numeric drivers
+### Binary drivers and ISY control commands
+
+State and detection changes emit ISY **control commands** (e.g. `OPEN`, `MOTION`, `LEAK`) so programs can trigger on events — not only on driver status.
+
+| Capability | Control commands (ON / OFF) |
+|---|---|
+| Contact open | `OPEN` / `CLOSED` |
+| Motion | `MOTION` / `NOMOTION` |
+| Leak | `LEAK` / `NOLEAK` |
+| Tamper | `TAMPER` / `NOTAMPER` |
+| Alarm (smoke/CO sound) | `ALARM` / `NOALARM` |
+| Glass break | `GLASS` / `NOGLASS` |
+
+Ephemeral detections (motion from events, glass break) auto-clear after `detection_timeout` if Protect does not send a close event.
+
+### Numeric drivers (environmental nodedef only)
 
 | Driver | Meaning | Units |
 |---|---|---|
-| **Temperature** | `stats.temperature` | °C (ISY uom 4) |
+| **Temperature** | `stats.temperature` | °C or °F per `temperature_units` |
 | **Humidity** | `stats.humidity` | % (ISY uom 22) |
 | **Light Level** | `stats.light` | lux (ISY uom 36) |
-
-Drivers for capabilities the physical sensor does not advertise stay at 0 and are not updated.
 
 ### Commands
 
@@ -103,22 +123,32 @@ Drivers for capabilities the physical sensor does not advertise stay at 0 and ar
 
 ## Camera nodes
 
-Each Protect camera becomes an ISY node keyed by MAC address (stable across re-adoption).
+Each Protect camera becomes an ISY node keyed by MAC address (stable across re-adoption). The plugin selects a nodedef from camera **feature flags**:
 
-### Drivers
+| Nodedef | Includes |
+|---|---|
+| **Detect** | Motion, Person, Vehicle, Animal, Package |
+| **AI** | Above + Face, License Plate (detection only), Line Crossing |
+| **AI + Audio** | Above + smoke, CO, siren, baby cry, horn, glass, speak, bark, car alarm |
+| **Doorbell** | Motion, smart detect, Face, Ring |
 
-- **Connected** — camera is online
-- **Motion** — motion detected
-- **Person** — person smart detection
-- **Vehicle** — vehicle smart detection
-- **Animal** — animal smart detection
-- **Package** — package smart detection
+### ISY control commands
+
+Detection drivers emit paired control commands (e.g. `PERSON` / `NOPERSON`, `RING` / `NORING`) on transitions. Programs should use **Control** triggers on these commands.
+
+Supported event types from the public API include `motion`, `smartDetectZone`, `smartDetectLine`, `smartAudioDetect`, and `ring`. Rich metadata (recognized face name, plate text) is not available on the public events stream.
 
 ### Commands
 
 - **Query** — refresh connected status from the Protect API
 
-Doorbell ringtone/volume controls are not implemented in this release (detection-focused scope).
+Doorbell ringtone/volume and Alarm Manager arm/disarm are **not** implemented (read-only plugin; deferred until public API support).
+
+## Scope
+
+- **Public Integration API only** — grows as Ubiquiti expands the official API
+- **Read-only** — subscribes to Protect; does not write commands to UniFi
+- **Global Alarm Manager** — features align with Global (not local-only) alarm configuration
 
 ## Controller commands
 

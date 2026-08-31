@@ -9,10 +9,13 @@ import udi_interface
 
 from nodes.Camera import Camera
 from nodes.Sensor import Sensor
-from utils.async_bridge import AsyncBridge
-from utils.protect_client import ProtectClient, device_address
-from utils.sensor_caps import sensor_capabilities, capability_config_changed
 from utils import sensor_state
+from utils.async_bridge import AsyncBridge
+from utils.camera_caps import camera_nodedef_for
+from utils.protect_client import ProtectClient, device_address
+from utils.sensor_caps import capability_config_changed, sensor_capabilities
+from utils.sensor_nodedef import sensor_nodedef_for_caps
+from utils.temperature import normalize_units
 
 LOGGER = udi_interface.LOGGER
 
@@ -36,6 +39,7 @@ class Controller(udi_interface.Node):
         self._cameras = {}
         self._sensors = {}
         self.detection_timeout = 300
+        self.temperature_units = 'F'
         self._initialized = False
         self._controller_added = False
         self._node_events = {}
@@ -125,6 +129,7 @@ class Controller(udi_interface.Node):
             "verify_ssl": "false",
             "detection_timeout": "300",
             "watchdog_minutes": "5",
+            "temperature_units": "F",
         }
         for param, default_value in defaults.items():
             if param not in self._params:
@@ -139,6 +144,9 @@ class Controller(udi_interface.Node):
                 0, int((self._params.get("detection_timeout") or "300").strip()))
         except (ValueError, TypeError):
             self.detection_timeout = 300
+
+        self.temperature_units = normalize_units(
+            self._params.get("temperature_units") or "F")
 
         host = (self._params.get("host") or "").strip()
         api_key = (self._params.get("api_key") or "").strip()
@@ -294,18 +302,22 @@ class Controller(udi_interface.Node):
         address = device_address(cam)
         if not address:
             return
+        nodedef_id = camera_nodedef_for(cam)
         if address in self._cameras:
             node = self._cameras[address]
+            node.update_camera(cam)
             node.set_connected(cam.get('state', '') == 'CONNECTED')
             return node
 
         name = cam.get('name') or cam_id
-        node = Camera(self.poly, self.address, address, name, cam_id, self)
+        node = Camera(
+            self.poly, self.address, address, name, cam_id, self,
+            nodedef_id, cam)
         self._add_node_wait(node, timeout=3)
         node.clear_detections()
         node.set_connected(cam.get('state', '') == 'CONNECTED')
         self._cameras[address] = node
-        LOGGER.info(f'Added camera: {name} ({address})')
+        LOGGER.info(f'Added camera: {name} ({address}) nodedef={nodedef_id}')
         return node
 
     def _ensure_sensor(self, sensor: dict):
@@ -316,6 +328,7 @@ class Controller(udi_interface.Node):
         if not address:
             return
         caps = sensor_capabilities(sensor)
+        nodedef_id = sensor_nodedef_for_caps(caps)
         if address in self._sensors:
             node = self._sensors[address]
             node.set_capabilities(caps)
@@ -323,13 +336,17 @@ class Controller(udi_interface.Node):
             return node
 
         name = sensor.get('name') or sensor_id
-        node = Sensor(self.poly, self.address, address, name, sensor_id, self)
+        node = Sensor(
+            self.poly, self.address, address, name, sensor_id, self,
+            nodedef_id)
         node.set_capabilities(caps)
         self._add_node_wait(node, timeout=3)
         node.clear_detections()
         node.apply_state(sensor, replace=True)
         self._sensors[address] = node
-        LOGGER.info(f'Added sensor: {name} ({address}) caps={sorted(caps)}')
+        LOGGER.info(
+            f'Added sensor: {name} ({address}) nodedef={nodedef_id} '
+            f'caps={sorted(caps)}')
         return node
 
     def _node_for_sensor(self, sensor_id: str):
@@ -404,21 +421,26 @@ class Controller(udi_interface.Node):
         else:
             is_open = data.get('end') is None
 
-        smart_types = {str(t).lower() for t in (data.get('smartDetectTypes') or [])}
-        smart_types.update(str(t).lower() for t in (data.get('smartDetectAudioTypes') or []))
-        is_glass = any('glass' in t for t in smart_types)
+        smart_types = list(data.get('smartDetectTypes') or [])
+        audio_types = list(data.get('smartDetectAudioTypes') or [])
 
         if cam_node:
             if evt_type == 'motion':
                 cam_node.set_motion(is_open)
-            elif evt_type == 'smartDetectZone':
-                for obj in (data.get('smartDetectTypes') or []):
-                    cam_node.set_smart(obj, is_open)
+            elif evt_type == 'ring':
+                cam_node.set_detection_type('ring', is_open)
+            elif evt_type == 'smartDetectLine':
+                cam_node.set_detection_type('line', is_open)
+            for obj in smart_types:
+                cam_node.set_smart(str(obj), is_open)
+            for obj in audio_types:
+                cam_node.set_detection_type(str(obj), is_open)
 
         if sensor_node:
             if evt_type == 'motion':
                 sensor_node.set_motion(is_open)
-            elif is_glass and sensor_state.CAP_GLASS in sensor_node._caps:
+            is_glass = any('glass' in str(t).lower() for t in smart_types + audio_types)
+            if is_glass and sensor_state.CAP_GLASS in sensor_node._caps:
                 sensor_node.set_glass_break(is_open)
 
     def poll(self, flag):
@@ -443,6 +465,7 @@ class Controller(udi_interface.Node):
         for cam in cameras:
             node = self._node_for_camera(cam.get('id', ''))
             if node:
+                node.update_camera(cam)
                 node.set_connected(cam.get('state', '') == 'CONNECTED')
             else:
                 await asyncio.get_event_loop().run_in_executor(

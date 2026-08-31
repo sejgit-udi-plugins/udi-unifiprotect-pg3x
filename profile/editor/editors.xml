@@ -4,6 +4,7 @@
   </editor>
   <editor id="E_TEMP">
     <range uom="4" min="-40" max="60" prec="1"/>
+    <range uom="17" min="-40" max="140" prec="1"/>
   </editor>
   <editor id="E_HUMID">
     <range uom="22" min="0" max="100" prec="0"/>

@@ -1,6 +1,5 @@
 <nodeDefs>
 
-  <!-- Controller Node -->
   <nodeDef id="unifi_controller" nodeType="139" nls="unifi_controller">
     <sts>
       <st id="ST" editor="E_STATUS"/>
@@ -14,43 +13,211 @@
     </cmds>
   </nodeDef>
 
-  <!-- Camera Node -->
-  <nodeDef id="unifi_camera" nodeType="139" nls="unifi_camera">
+  <!-- Camera nodedefs (capability-based) -->
+  <nodeDef id="unifi_camera_detect" nodeType="139" nls="unifi_camera_detect">
     <sts>
-      <st id="ST"   editor="E_STATUS"/>    <!-- Connected -->
-      <st id="GV1"  editor="E_STATUS"/>    <!-- Motion detected -->
-      <st id="GV2"  editor="E_STATUS"/>    <!-- Person detected -->
-      <st id="GV3"  editor="E_STATUS"/>    <!-- Vehicle detected -->
-      <st id="GV4"  editor="E_STATUS"/>    <!-- Animal detected -->
-      <st id="GV5"  editor="E_STATUS"/>    <!-- Package detected -->
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+      <st id="GV4" editor="E_STATUS"/>
+      <st id="GV5" editor="E_STATUS"/>
     </sts>
     <cmds>
-      <sends/>
-      <accepts>
-        <cmd id="QUERY"/>
-      </accepts>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="PERSON"/><cmd id="NOPERSON"/>
+        <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
+        <cmd id="ANIMAL"/><cmd id="NOANIMAL"/>
+        <cmd id="PACKAGE"/><cmd id="NOPACKAGE"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
     </cmds>
   </nodeDef>
 
-  <!-- USL / UP Sense Sensor Node -->
-  <nodeDef id="unifi_sensor" nodeType="139" nls="unifi_sensor">
+  <nodeDef id="unifi_camera_ai" nodeType="139" nls="unifi_camera_ai">
     <sts>
-      <st id="ST"  editor="E_STATUS"/>     <!-- Connected -->
-      <st id="GV1" editor="E_STATUS"/>     <!-- Motion -->
-      <st id="GV2" editor="E_STATUS"/>     <!-- Contact open -->
-      <st id="GV3" editor="E_STATUS"/>     <!-- Leak / wet -->
-      <st id="GV4" editor="E_STATUS"/>     <!-- Tamper -->
-      <st id="GV5" editor="E_STATUS"/>     <!-- Alarm / smoke -->
-      <st id="GV6" editor="E_STATUS"/>     <!-- Glass break -->
-      <st id="CV1" editor="E_TEMP"/>       <!-- Temperature °C -->
-      <st id="CV2" editor="E_HUMID"/>      <!-- Humidity % -->
-      <st id="CV3" editor="E_LUX"/>        <!-- Light lux -->
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+      <st id="GV4" editor="E_STATUS"/>
+      <st id="GV5" editor="E_STATUS"/>
+      <st id="GV6" editor="E_STATUS"/>
+      <st id="GV7" editor="E_STATUS"/>
+      <st id="GV8" editor="E_STATUS"/>
     </sts>
     <cmds>
-      <sends/>
-      <accepts>
-        <cmd id="QUERY"/>
-      </accepts>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="PERSON"/><cmd id="NOPERSON"/>
+        <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
+        <cmd id="ANIMAL"/><cmd id="NOANIMAL"/>
+        <cmd id="PACKAGE"/><cmd id="NOPACKAGE"/>
+        <cmd id="FACE"/><cmd id="NOFACE"/>
+        <cmd id="LPR"/><cmd id="NOLPR"/>
+        <cmd id="LINE"/><cmd id="NOLINE"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_camera_ai_audio" nodeType="139" nls="unifi_camera_ai_audio">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+      <st id="GV4" editor="E_STATUS"/>
+      <st id="GV5" editor="E_STATUS"/>
+      <st id="GV6" editor="E_STATUS"/>
+      <st id="GV7" editor="E_STATUS"/>
+      <st id="GV8" editor="E_STATUS"/>
+      <st id="GV9" editor="E_STATUS"/>
+      <st id="GV10" editor="E_STATUS"/>
+      <st id="GV11" editor="E_STATUS"/>
+      <st id="GV12" editor="E_STATUS"/>
+      <st id="GV13" editor="E_STATUS"/>
+      <st id="GV14" editor="E_STATUS"/>
+      <st id="GV15" editor="E_STATUS"/>
+      <st id="GV16" editor="E_STATUS"/>
+      <st id="GV17" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="PERSON"/><cmd id="NOPERSON"/>
+        <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
+        <cmd id="ANIMAL"/><cmd id="NOANIMAL"/>
+        <cmd id="PACKAGE"/><cmd id="NOPACKAGE"/>
+        <cmd id="FACE"/><cmd id="NOFACE"/>
+        <cmd id="LPR"/><cmd id="NOLPR"/>
+        <cmd id="LINE"/><cmd id="NOLINE"/>
+        <cmd id="SMOKE"/><cmd id="NOSMOKE"/>
+        <cmd id="CO"/><cmd id="NOCO"/>
+        <cmd id="SIREN"/><cmd id="NOSIREN"/>
+        <cmd id="BABYCRY"/><cmd id="NOBABYCRY"/>
+        <cmd id="HORN"/><cmd id="NOHORN"/>
+        <cmd id="GLASS"/><cmd id="NOGLASS"/>
+        <cmd id="SPEAK"/><cmd id="NOSPEAK"/>
+        <cmd id="BARK"/><cmd id="NOBARK"/>
+        <cmd id="CARALRM"/><cmd id="NOCARALRM"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_camera_doorbell" nodeType="139" nls="unifi_camera_doorbell">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+      <st id="GV4" editor="E_STATUS"/>
+      <st id="GV5" editor="E_STATUS"/>
+      <st id="GV6" editor="E_STATUS"/>
+      <st id="GV18" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="PERSON"/><cmd id="NOPERSON"/>
+        <cmd id="VEHICLE"/><cmd id="NOVEHICLE"/>
+        <cmd id="ANIMAL"/><cmd id="NOANIMAL"/>
+        <cmd id="PACKAGE"/><cmd id="NOPACKAGE"/>
+        <cmd id="FACE"/><cmd id="NOFACE"/>
+        <cmd id="RING"/><cmd id="NORING"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <!-- Sensor nodedefs (capability-based) -->
+  <nodeDef id="unifi_sensor_contact" nodeType="139" nls="unifi_sensor_contact">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="OPEN"/><cmd id="CLOSED"/>
+        <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_sensor_motion" nodeType="139" nls="unifi_sensor_motion">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_sensor_leak" nodeType="139" nls="unifi_sensor_leak">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="LEAK"/><cmd id="NOLEAK"/>
+        <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_sensor_glass" nodeType="139" nls="unifi_sensor_glass">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="GLASS"/><cmd id="NOGLASS"/>
+        <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
+    </cmds>
+  </nodeDef>
+
+  <nodeDef id="unifi_sensor_env" nodeType="139" nls="unifi_sensor_env">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>
+      <st id="GV1" editor="E_STATUS"/>
+      <st id="GV2" editor="E_STATUS"/>
+      <st id="GV3" editor="E_STATUS"/>
+      <st id="GV4" editor="E_STATUS"/>
+      <st id="GV5" editor="E_STATUS"/>
+      <st id="GV6" editor="E_STATUS"/>
+      <st id="CV1" editor="E_TEMP"/>
+      <st id="CV2" editor="E_HUMID"/>
+      <st id="CV3" editor="E_LUX"/>
+    </sts>
+    <cmds>
+      <sends>
+        <cmd id="MOTION"/><cmd id="NOMOTION"/>
+        <cmd id="OPEN"/><cmd id="CLOSED"/>
+        <cmd id="LEAK"/><cmd id="NOLEAK"/>
+        <cmd id="TAMPER"/><cmd id="NOTAMPER"/>
+        <cmd id="ALARM"/><cmd id="NOALARM"/>
+        <cmd id="GLASS"/><cmd id="NOGLASS"/>
+      </sends>
+      <accepts><cmd id="QUERY"/></accepts>
     </cmds>
   </nodeDef>
 

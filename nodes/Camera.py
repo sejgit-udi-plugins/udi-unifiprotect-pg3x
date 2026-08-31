@@ -1,81 +1,131 @@
 """UniFi Protect camera node."""
 
+from __future__ import annotations
+
 import threading
+from copy import deepcopy
 
 import udi_interface
+
+from utils.binary_detect import set_binary_detection
+from utils.camera_caps import camera_supports_smart_type
+from utils.camera_layouts import (
+    CAMERA_DRIVERS,
+    DETECTION_DRIVERS_BY_NODEDEF,
+    cmd_pair_for_driver,
+    lookup_detection,
+)
 
 LOGGER = udi_interface.LOGGER
 
 
 class Camera(udi_interface.Node):
-    id = 'unifi_camera'
+    id = 'unifi_camera_detect'
 
-    drivers = [
-        {'driver': 'ST',  'value': 0, 'uom': 2},
-        {'driver': 'GV1', 'value': 0, 'uom': 2},
-        {'driver': 'GV2', 'value': 0, 'uom': 2},
-        {'driver': 'GV3', 'value': 0, 'uom': 2},
-        {'driver': 'GV4', 'value': 0, 'uom': 2},
-        {'driver': 'GV5', 'value': 0, 'uom': 2},
-    ]
+    drivers = CAMERA_DRIVERS['unifi_camera_detect']
 
-    DETECTION_DRIVERS = ('GV1', 'GV2', 'GV3', 'GV4', 'GV5')
-
-    def __init__(self, polyglot, primary, address, name, camera_id, controller):
+    def __init__(
+        self,
+        polyglot,
+        primary,
+        address,
+        name,
+        camera_id,
+        controller,
+        nodedef_id: str,
+        camera: dict | None = None,
+    ):
+        self.id = nodedef_id
+        self.drivers = deepcopy(CAMERA_DRIVERS[nodedef_id])
         super().__init__(polyglot, primary, address, name)
         self.camera_id = camera_id
         self._ctrl = controller
+        self._camera = camera or {}
+        self._allowed = set(DETECTION_DRIVERS_BY_NODEDEF.get(nodedef_id, ()))
         self._timers = {}
         self._timer_lock = threading.Lock()
 
-    def _set(self, driver, value):
-        self.setDriver(driver, 1 if value else 0, report=True, force=False)
+    def update_camera(self, camera: dict):
+        self._camera = camera
 
-    def set_connected(self, connected: bool):
-        self._set('ST', connected)
-
-    def set_motion(self, active: bool):
-        self._set_detection('GV1', active)
-
-    def set_smart(self, obj_type: str, active: bool):
-        mapping = {
-            'person': 'GV2',
-            'vehicle': 'GV3',
-            'animal': 'GV4',
-            'package': 'GV5',
-        }
-        driver = mapping.get(obj_type)
-        if driver:
-            self._set_detection(driver, active)
-
-    def _set_detection(self, driver, active: bool):
-        self._set(driver, active)
-        timeout = self._ctrl.detection_timeout if self._ctrl else 0
-        with self._timer_lock:
-            existing = self._timers.pop(driver, None)
-            if existing:
-                existing.cancel()
-            if active and timeout > 0:
-                timer = threading.Timer(timeout, self._timeout_clear, args=(driver,))
-                timer.daemon = True
-                self._timers[driver] = timer
-                timer.start()
-
-    def _timeout_clear(self, driver):
+    def _timeout_clear(self, driver: str):
+        cmd_pair = self._cmd_pair_for_driver(driver)
         with self._timer_lock:
             self._timers.pop(driver, None)
         LOGGER.warning(
             f'{self.name}: {driver} auto-cleared after '
             f'{self._ctrl.detection_timeout}s (no close event received)')
-        self._set(driver, False)
+        set_binary_detection(
+            self,
+            driver,
+            False,
+            cmd_pair=cmd_pair,
+            timers=self._timers,
+            timer_lock=self._timer_lock,
+            timeout_sec=0,
+            on_timeout=self._timeout_clear,
+        )
+
+    def _cmd_pair_for_driver(self, driver: str):
+        return cmd_pair_for_driver(driver)
+
+    def set_connected(self, connected: bool):
+        set_binary_detection(
+            self,
+            'ST',
+            connected,
+            cmd_pair=None,
+            timers=self._timers,
+            timer_lock=self._timer_lock,
+            timeout_sec=0,
+            on_timeout=self._timeout_clear,
+        )
+
+    def set_detection_type(self, detect_type: str, active: bool):
+        if self._camera and not camera_supports_smart_type(self._camera, detect_type):
+            return
+        mapping = lookup_detection(detect_type)
+        if not mapping:
+            return
+        driver, cmd_pair = mapping
+        if driver not in self._allowed:
+            return
+        timeout = self._ctrl.detection_timeout if self._ctrl else 0
+        set_binary_detection(
+            self,
+            driver,
+            active,
+            cmd_pair=cmd_pair,
+            timers=self._timers,
+            timer_lock=self._timer_lock,
+            timeout_sec=timeout,
+            on_timeout=self._timeout_clear,
+        )
+
+    def set_motion(self, active: bool):
+        self.set_detection_type('motion', active)
+
+    def set_smart(self, obj_type: str, active: bool):
+        self.set_detection_type(obj_type, active)
 
     def clear_detections(self):
         with self._timer_lock:
             for timer in self._timers.values():
                 timer.cancel()
             self._timers.clear()
-        for driver in self.DETECTION_DRIVERS:
-            self.setDriver(driver, 0, report=True, force=True)
+        for driver in self._allowed:
+            cmd_pair = self._cmd_pair_for_driver(driver)
+            set_binary_detection(
+                self,
+                driver,
+                False,
+                cmd_pair=cmd_pair,
+                timers=self._timers,
+                timer_lock=self._timer_lock,
+                timeout_sec=0,
+                on_timeout=self._timeout_clear,
+                force=True,
+            )
 
     def query(self, command=None):
         if self._ctrl and self._ctrl._client:
@@ -86,6 +136,7 @@ class Camera(udi_interface.Node):
     async def _refresh(self):
         try:
             cam = await self._ctrl._client.get_camera(self.camera_id)
+            self._camera = cam
             self.set_connected(cam.get('state', '') == 'CONNECTED')
             self.reportDrivers()
         except Exception as e:
