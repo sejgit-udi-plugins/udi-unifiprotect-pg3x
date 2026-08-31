@@ -50,28 +50,47 @@ class Sensor(udi_interface.Node):
             self._state = dict(sensor)
         else:
             self._state = sensor_state.merge_sensor_state(self._state, sensor)
-        sensor = self._state
-        self.set_connected(sensor_state.is_connected(sensor))
-        if sensor_state.CAP_MOTION in self._caps:
-            self._set_bin('GV1', bool(sensor.get('isMotionDetected')))
-        if sensor_state.CAP_OPEN in self._caps:
-            self._set_bin('GV2', sensor_state.contact_open(sensor))
-        if sensor_state.CAP_WATER_LEAK in self._caps:
-            self._set_bin('GV3', sensor_state.is_leak_detected(sensor))
-        if sensor_state.CAP_TAMPER in self._caps:
-            self._set_bin('GV4', sensor_state.is_tampering_detected(sensor))
-        if sensor_state.CAP_SMOKE in self._caps:
-            self._set_bin('GV5', sensor_state.is_alarm_triggered(sensor))
+        data = self._state
 
-        temp = sensor_state.metric_value(sensor, 'temperature')
-        if sensor_state.CAP_TEMPERATURE in self._caps and temp is not None:
-            self._set_num('CV1', temp)
-        hum = sensor_state.metric_value(sensor, 'humidity')
-        if sensor_state.CAP_HUMIDITY in self._caps and hum is not None:
-            self._set_num('CV2', hum)
-        light = sensor_state.metric_value(sensor, 'light')
-        if sensor_state.CAP_LIGHT in self._caps and light is not None:
-            self._set_num('CV3', light)
+        if 'state' in sensor or replace:
+            self.set_connected(sensor_state.is_connected(data))
+
+        if sensor_state.CAP_MOTION in self._caps and 'isMotionDetected' in sensor:
+            self._set_bin('GV1', bool(data.get('isMotionDetected')))
+        if sensor_state.CAP_OPEN in self._caps and 'isOpened' in sensor:
+            self._set_bin('GV2', sensor_state.contact_open(data))
+        if sensor_state.CAP_WATER_LEAK in self._caps and (
+                'leakDetectedAt' in sensor or 'externalLeakDetectedAt' in sensor):
+            self._set_bin('GV3', sensor_state.is_leak_detected(data))
+        if sensor_state.CAP_TAMPER in self._caps and 'tamperingDetectedAt' in sensor:
+            self._set_bin('GV4', sensor_state.is_tampering_detected(data))
+        if sensor_state.CAP_SMOKE in self._caps and 'alarmTriggeredAt' in sensor:
+            self._set_bin('GV5', sensor_state.is_alarm_triggered(data))
+
+        stats = sensor.get('stats')
+        if isinstance(stats, dict):
+            if sensor_state.CAP_TEMPERATURE in self._caps:
+                temp = sensor_state.metric_value(data, 'temperature')
+                if temp is not None and 'temperature' in stats:
+                    self._set_num('CV1', temp)
+            if sensor_state.CAP_HUMIDITY in self._caps:
+                hum = sensor_state.metric_value(data, 'humidity')
+                if hum is not None and 'humidity' in stats:
+                    self._set_num('CV2', hum)
+            if sensor_state.CAP_LIGHT in self._caps:
+                light = sensor_state.metric_value(data, 'light')
+                if light is not None and 'light' in stats:
+                    self._set_num('CV3', light)
+        elif replace:
+            temp = sensor_state.metric_value(data, 'temperature')
+            if sensor_state.CAP_TEMPERATURE in self._caps and temp is not None:
+                self._set_num('CV1', temp)
+            hum = sensor_state.metric_value(data, 'humidity')
+            if sensor_state.CAP_HUMIDITY in self._caps and hum is not None:
+                self._set_num('CV2', hum)
+            light = sensor_state.metric_value(data, 'light')
+            if sensor_state.CAP_LIGHT in self._caps and light is not None:
+                self._set_num('CV3', light)
 
     def set_connected(self, connected: bool):
         self._set_bin('ST', connected)

@@ -20,7 +20,7 @@
         {
             "title": "UniFi Protect NodeServer",
             "author": "Stephen Jenkins",
-            "version": "1.3.1",
+            "version": "1.3.2",
             "date": "August 2026",
             "source": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x",
             "license": "https://github.com/sejgit-udi-plugins/udi-unifiprotect-pg3x/blob/main/LICENSE"

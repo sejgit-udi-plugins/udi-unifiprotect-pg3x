@@ -11,7 +11,7 @@ from nodes.Camera import Camera
 from nodes.Sensor import Sensor
 from utils.async_bridge import AsyncBridge
 from utils.protect_client import ProtectClient, device_address
-from utils.sensor_caps import sensor_capabilities
+from utils.sensor_caps import sensor_capabilities, capability_config_changed
 from utils import sensor_state
 
 LOGGER = udi_interface.LOGGER
@@ -347,9 +347,15 @@ class Controller(udi_interface.Node):
     def _on_integration_device(self, message: dict):
         try:
             item = message.get('item') or {}
-            model_key = item.get('modelKey', '')
             dev_id = item.get('id', '')
+            model_key = item.get('modelKey', '')
             msg_type = message.get('type', '')
+
+            if not model_key and dev_id:
+                if self._node_for_sensor(dev_id):
+                    model_key = 'sensor'
+                elif self._node_for_camera(dev_id):
+                    model_key = 'camera'
 
             if model_key == 'camera':
                 node = self._node_for_camera(dev_id)
@@ -363,7 +369,9 @@ class Controller(udi_interface.Node):
             if model_key == 'sensor':
                 node = self._node_for_sensor(dev_id)
                 if node:
-                    node.set_capabilities(sensor_capabilities(item))
+                    if capability_config_changed(item):
+                        merged = sensor_state.merge_sensor_state(node._state, item)
+                        node.set_capabilities(sensor_capabilities(merged))
                     node.apply_state(item)
                 elif msg_type == 'add':
                     LOGGER.info(f'New sensor detected ({dev_id}) — resyncing')

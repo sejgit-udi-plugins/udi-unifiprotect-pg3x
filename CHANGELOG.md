@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## 1.3.2
+
+- Fix sensor live updates dropped after partial WebSocket messages recalculated capabilities
+- Only refresh sensor capability map when config fields change; infer modelKey from device id
+- Apply driver updates only for fields present in each WebSocket payload
+
 ## 1.3.1
 
 - Fix sensor Connected flapping on WebSocket partial updates (merge cached state)

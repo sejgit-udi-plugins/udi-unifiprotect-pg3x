@@ -35,6 +35,31 @@ def test_merge_preserves_connection_on_partial_update():
     assert sensor_state.metric_value(merged, 'humidity') == 44.0
 
 
+def test_partial_stats_update_keeps_full_capabilities():
+    full = {
+        'mountType': 'none',
+        'featureFlags': {
+            'temperature': {'channelCount': 1},
+            'humidity': {'channelCount': 1},
+            'light': {'channelCount': 1},
+        },
+    }
+    partial = {'stats': {'humidity': {'value': 55.0}}}
+    merged = sensor_state.merge_sensor_state(full, partial)
+    caps = sensor_capabilities(merged)
+    assert sensor_state.CAP_TEMPERATURE in caps
+    assert sensor_state.CAP_HUMIDITY in caps
+    assert sensor_state.CAP_LIGHT in caps
+
+
+def test_capability_config_changed():
+    from utils.sensor_caps import capability_config_changed
+
+    assert capability_config_changed({'featureFlags': {}})
+    assert not capability_config_changed({'stats': {'humidity': {'value': 1}}})
+    assert not capability_config_changed({'isOpened': True})
+
+
 def test_feature_flags_gate_temperature():
     sensor = {
         'featureFlags': {'temperature': {'channelCount': 1}},
