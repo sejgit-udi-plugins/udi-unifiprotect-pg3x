@@ -415,7 +415,7 @@ class Controller(udi_interface.Node):
         if not cam_node and not sensor_node:
             return
 
-        evt_type = data.get('type', '')
+        evt_type = (data.get('type') or '').strip()
         if change_type == 'remove':
             is_open = False
         else:
@@ -425,11 +425,14 @@ class Controller(udi_interface.Node):
         audio_types = list(data.get('smartDetectAudioTypes') or [])
 
         if cam_node:
-            if evt_type == 'motion':
+            evt_lower = evt_type.lower()
+            if evt_lower == 'motion':
                 cam_node.set_motion(is_open)
-            elif evt_type == 'ring':
+            elif evt_lower == 'ring':
                 cam_node.set_detection_type('ring', is_open)
-            elif evt_type == 'smartDetectLine':
+            elif evt_lower == 'smartdetectline':
+                LOGGER.info(
+                    f'Line crossing event on {cam_node.name}: open={is_open}')
                 cam_node.set_detection_type('line', is_open)
             for obj in smart_types:
                 cam_node.set_smart(str(obj), is_open)

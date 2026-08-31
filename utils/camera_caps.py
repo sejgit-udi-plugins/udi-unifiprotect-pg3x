@@ -42,7 +42,29 @@ def camera_audio_types(camera: dict) -> set:
 
 def camera_has_line_crossing(camera: dict) -> bool:
     flags = _feature_flags(camera)
-    return bool(flags.get('hasLineCrossing') or flags.get('hasLineCrossingCounting'))
+    if flags.get('hasLineCrossing') or flags.get('hasLineCrossingCounting'):
+        return True
+    settings = camera.get('smartDetectSettings') or {}
+    if settings.get('lines') or settings.get('lineCrossing'):
+        return True
+    return False
+
+
+def camera_supports_line_events(camera: dict) -> bool:
+    """Whether line-crossing events should be honored for this camera.
+
+    The public Integration API often omits ``hasLineCrossing`` from
+    ``featureFlags`` even when lines are configured in Protect. When we cannot
+    disprove line support, trust ``smartDetectLine`` events from the stream.
+    """
+    if camera_has_line_crossing(camera):
+        return True
+    flags = _feature_flags(camera)
+    if flags is None:
+        return True
+    # Public API returns a trimmed featureFlags object without line-crossing
+    # keys; absence of those keys does not mean lines are disabled.
+    return True
 
 
 def camera_is_doorbell(camera: dict) -> bool:
@@ -69,7 +91,7 @@ def camera_supports_smart_type(camera: dict, normalized_type: str) -> bool:
     if norm == 'motion':
         return True
     if norm == 'line' or norm == 'linecross':
-        return camera_has_line_crossing(camera)
+        return camera_supports_line_events(camera)
     if norm in _AUDIO_SMART:
         return norm in camera_audio_types(camera)
     if norm in _AI_SMART or norm in _BASIC_SMART:

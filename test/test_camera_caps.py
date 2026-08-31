@@ -52,3 +52,14 @@ def test_supports_line_crossing():
     cam = {'featureFlags': {'hasLineCrossing': True}}
     assert camera_supports_smart_type(cam, 'line')
     assert camera_nodedef_for(cam) == NODEDEF_AI
+
+
+def test_line_events_allowed_when_public_api_omits_flag():
+    """Public Integration API strips hasLineCrossing from featureFlags."""
+    cam = {
+        'featureFlags': {
+            'smartDetectTypes': ['person', 'face'],
+        },
+    }
+    assert camera_supports_smart_type(cam, 'line')
+    assert camera_supports_smart_type(cam, 'person')

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## 1.5.1
+
+- Fix line crossing ignored on public API cameras (``hasLineCrossing`` omitted from featureFlags)
+- Log line crossing events at INFO for easier EISY troubleshooting
+
 ## 1.5.0
 
 - Capability-based camera nodedefs: detect, AI (face/LPR/line), AI+audio, doorbell
