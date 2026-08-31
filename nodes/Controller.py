@@ -8,8 +8,11 @@ import aiohttp
 import udi_interface
 
 from nodes.Camera import Camera
+from nodes.Sensor import Sensor
 from utils.async_bridge import AsyncBridge
-from utils.protect_client import ProtectClient, camera_address
+from utils.protect_client import ProtectClient, device_address
+from utils.sensor_caps import sensor_capabilities
+from utils import sensor_state
 
 LOGGER = udi_interface.LOGGER
 
@@ -31,6 +34,7 @@ class Controller(udi_interface.Node):
         self._async = AsyncBridge()
         self._client = None
         self._cameras = {}
+        self._sensors = {}
         self.detection_timeout = 300
         self._initialized = False
         self._controller_added = False
@@ -204,10 +208,13 @@ class Controller(udi_interface.Node):
                 await self._client.connect()
 
                 cameras = await self._client.get_cameras()
-                LOGGER.info(f'Loaded {len(cameras)} camera(s) from integration API')
+                sensors = await self._client.get_sensors()
+                LOGGER.info(
+                    f'Loaded {len(cameras)} camera(s) and {len(sensors)} sensor(s) '
+                    'from integration API')
 
                 await asyncio.get_event_loop().run_in_executor(
-                    None, self._discover_cameras, cameras)
+                    None, self._discover_devices, cameras, sensors)
 
                 LOGGER.info('Listening on integration event/device WebSockets')
                 backoff = 5
@@ -270,6 +277,12 @@ class Controller(udi_interface.Node):
         except Exception as e:
             LOGGER.error(f'Self-restart failed: {e}')
 
+    def _discover_devices(self, cameras: list, sensors: list):
+        for cam in cameras:
+            self._ensure_camera(cam)
+        for sensor in sensors:
+            self._ensure_sensor(sensor)
+
     def _discover_cameras(self, cameras: list):
         for cam in cameras:
             self._ensure_camera(cam)
@@ -278,7 +291,7 @@ class Controller(udi_interface.Node):
         if (cam.get('modelKey') or 'camera') != 'camera':
             return
         cam_id = cam.get('id', '')
-        address = camera_address(cam)
+        address = device_address(cam)
         if not address:
             return
         if address in self._cameras:
@@ -295,6 +308,36 @@ class Controller(udi_interface.Node):
         LOGGER.info(f'Added camera: {name} ({address})')
         return node
 
+    def _ensure_sensor(self, sensor: dict):
+        if (sensor.get('modelKey') or 'sensor') != 'sensor':
+            return
+        sensor_id = sensor.get('id', '')
+        address = device_address(sensor)
+        if not address:
+            return
+        caps = sensor_capabilities(sensor)
+        if address in self._sensors:
+            node = self._sensors[address]
+            node.set_capabilities(caps)
+            node.apply_state(sensor)
+            return node
+
+        name = sensor.get('name') or sensor_id
+        node = Sensor(self.poly, self.address, address, name, sensor_id, self)
+        node.set_capabilities(caps)
+        self._add_node_wait(node, timeout=3)
+        node.clear_detections()
+        node.apply_state(sensor)
+        self._sensors[address] = node
+        LOGGER.info(f'Added sensor: {name} ({address}) caps={sorted(caps)}')
+        return node
+
+    def _node_for_sensor(self, sensor_id: str):
+        for node in self._sensors.values():
+            if node.sensor_id == sensor_id:
+                return node
+        return None
+
     def _node_for_camera(self, camera_id: str):
         for node in self._cameras.values():
             if node.camera_id == camera_id:
@@ -304,16 +347,27 @@ class Controller(udi_interface.Node):
     def _on_integration_device(self, message: dict):
         try:
             item = message.get('item') or {}
-            if item.get('modelKey') != 'camera':
-                return
-            cam_id = item.get('id', '')
-            node = self._node_for_camera(cam_id)
+            model_key = item.get('modelKey', '')
+            dev_id = item.get('id', '')
             msg_type = message.get('type', '')
-            if node and 'state' in item:
-                node.set_connected(item.get('state') == 'CONNECTED')
-            elif msg_type == 'add' and not node:
-                LOGGER.info(f'New camera detected ({cam_id}) — resyncing')
-                self._async.submit(self._resync())
+
+            if model_key == 'camera':
+                node = self._node_for_camera(dev_id)
+                if node and 'state' in item:
+                    node.set_connected(item.get('state') == 'CONNECTED')
+                elif msg_type == 'add' and not node:
+                    LOGGER.info(f'New camera detected ({dev_id}) — resyncing')
+                    self._async.submit(self._resync())
+                return
+
+            if model_key == 'sensor':
+                node = self._node_for_sensor(dev_id)
+                if node:
+                    node.set_capabilities(sensor_capabilities(item))
+                    node.apply_state(item)
+                elif msg_type == 'add':
+                    LOGGER.info(f'New sensor detected ({dev_id}) — resyncing')
+                    self._async.submit(self._resync())
         except Exception as e:
             LOGGER.error(f'Error handling device message: {e}', exc_info=True)
 
@@ -327,12 +381,13 @@ class Controller(udi_interface.Node):
             LOGGER.error(f'Error handling event message: {e}', exc_info=True)
 
     def _handle_event(self, change_type: str, data: dict):
-        cam_id = data.get('device') or data.get('camera') or data.get('cameraId')
-        if not cam_id:
+        dev_id = data.get('device') or data.get('camera') or data.get('cameraId')
+        if not dev_id:
             return
 
-        node = self._node_for_camera(cam_id)
-        if not node:
+        cam_node = self._node_for_camera(dev_id)
+        sensor_node = self._node_for_sensor(dev_id)
+        if not cam_node and not sensor_node:
             return
 
         evt_type = data.get('type', '')
@@ -341,11 +396,22 @@ class Controller(udi_interface.Node):
         else:
             is_open = data.get('end') is None
 
-        if evt_type == 'motion':
-            node.set_motion(is_open)
-        elif evt_type == 'smartDetectZone':
-            for obj in (data.get('smartDetectTypes') or []):
-                node.set_smart(obj, is_open)
+        smart_types = {str(t).lower() for t in (data.get('smartDetectTypes') or [])}
+        smart_types.update(str(t).lower() for t in (data.get('smartDetectAudioTypes') or []))
+        is_glass = any('glass' in t for t in smart_types)
+
+        if cam_node:
+            if evt_type == 'motion':
+                cam_node.set_motion(is_open)
+            elif evt_type == 'smartDetectZone':
+                for obj in (data.get('smartDetectTypes') or []):
+                    cam_node.set_smart(obj, is_open)
+
+        if sensor_node:
+            if evt_type == 'motion':
+                sensor_node.set_motion(is_open)
+            elif is_glass and sensor_state.CAP_GLASS in sensor_node._caps:
+                sensor_node.set_glass_break(is_open)
 
     def poll(self, flag):
         if flag == 'shortPoll':
@@ -359,6 +425,7 @@ class Controller(udi_interface.Node):
     async def _resync(self):
         try:
             cameras = await self._client.get_cameras()
+            sensors = await self._client.get_sensors()
         except aiohttp.ClientResponseError as e:
             LOGGER.warning(f'Resync failed: {e}')
             return
@@ -372,10 +439,20 @@ class Controller(udi_interface.Node):
             else:
                 await asyncio.get_event_loop().run_in_executor(
                     None, self._ensure_camera, cam)
+        for sensor in sensors:
+            node = self._node_for_sensor(sensor.get('id', ''))
+            if node:
+                node.set_capabilities(sensor_capabilities(sensor))
+                node.apply_state(sensor)
+            else:
+                await asyncio.get_event_loop().run_in_executor(
+                    None, self._ensure_sensor, sensor)
 
     def query(self, command=None):
         self.reportDrivers()
         for node in self._cameras.values():
+            node.query()
+        for node in self._sensors.values():
             node.query()
 
     def cmd_discover(self, command=None):

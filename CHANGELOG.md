@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## 1.3.0
+
+- Add USL / UP Sense sensor nodes via `GET /integration/v1/sensors`
+- Per-sensor drivers: motion, contact, leak, tamper, alarm, glass break, temp, humidity, light
+- Capability-aware driver mapping from Protect `featureFlags`
+
 ## 1.2.0
 
 - Migrate to UniFi Protect Public Integration API (v1) with API-key-only auth

@@ -8,6 +8,7 @@ Repository: [sejgit-udi-plugins/udi-unifiprotect-pg3x](https://github.com/sejgit
 
 - Real-time motion and smart detection via Public Integration API WebSockets
 - Per-camera drivers: Connected, Motion, Person, Vehicle, Animal, Package
+- USL / UP Sense sensor support: contact, leak, motion, tamper, alarm, glass break, temp, humidity, light
 - API-key-only auth (UniFi Protect 5.3+ Integration API)
 - Local API only — no Ubiquiti cloud required
 - aiohttp-only client (FreeBSD / EISY compatible)

@@ -21,11 +21,16 @@ def unwrap_api_payload(payload: Any) -> Any:
 
 
 def camera_address(cam: dict) -> str:
-    mac = (cam.get('mac') or '').strip()
-    cam_id = (cam.get('id') or '').strip()
+    """Stable ISY node address from device MAC or id."""
+    return device_address(cam)
+
+
+def device_address(device: dict) -> str:
+    mac = (device.get('mac') or '').strip()
+    dev_id = (device.get('id') or '').strip()
     if mac:
         return mac.lower().replace(':', '')[:14]
-    return cam_id[:14].lower().replace('-', '')
+    return dev_id[:14].lower().replace('-', '')
 
 
 class ProtectClient:
@@ -70,6 +75,30 @@ class ProtectClient:
         if not isinstance(cameras, list):
             raise RuntimeError(f'Unexpected cameras response: {type(cameras).__name__}')
         return cameras
+
+    async def get_sensor(self, sensor_id: str) -> dict:
+        resp = await self._session.get(
+            self._api_url(f'/sensors/{sensor_id}'),
+            headers=self._headers(),
+            ssl=self._ssl,
+        )
+        resp.raise_for_status()
+        sensor = unwrap_api_payload(await resp.json())
+        if not isinstance(sensor, dict):
+            raise RuntimeError(f'Unexpected sensor response: {type(sensor).__name__}')
+        return sensor
+
+    async def get_sensors(self) -> list:
+        resp = await self._session.get(
+            self._api_url('/sensors'),
+            headers=self._headers(),
+            ssl=self._ssl,
+        )
+        resp.raise_for_status()
+        sensors = unwrap_api_payload(await resp.json())
+        if not isinstance(sensors, list):
+            raise RuntimeError(f'Unexpected sensors response: {type(sensors).__name__}')
+        return sensors
 
     async def get_camera(self, camera_id: str) -> dict:
         resp = await self._session.get(

@@ -71,6 +71,36 @@ Minutes of sustained connection failure before the plugin restarts itself as a l
 
 Brief network blips are retried automatically; a Polyglot notice appears after about one minute offline.
 
+## Sensor nodes (USL Gateway / UP Sense)
+
+Each adopted Protect sensor becomes an ISY node keyed by MAC address. Drivers are created from the sensor **capability map** (`featureFlags`) when Protect provides it; older firmware falls back to mount type and settings.
+
+### Binary drivers
+
+| Driver | Meaning | Typical hardware |
+|---|---|---|
+| **Connected** | Sensor online | All |
+| **Motion** | PIR motion active | Motion, Environmental, Glass Break |
+| **Contact Open** | Door/window/garage open | Entry, UP Sense contact |
+| **Leak** | Internal or external leak detected | Leak, Environmental |
+| **Tamper** | Tamper switch triggered | Most USL sensors |
+| **Alarm** | Smoke/CO alarm sound detected | UP Sense (when enabled) |
+| **Glass Break** | Glass-break event (events stream) | USL Glass Break |
+
+### Numeric drivers
+
+| Driver | Meaning | Units |
+|---|---|---|
+| **Temperature** | `stats.temperature` | °C (ISY uom 105) |
+| **Humidity** | `stats.humidity` | % |
+| **Light Level** | `stats.light` | lux |
+
+Drivers for capabilities the physical sensor does not advertise stay at 0 and are not updated.
+
+### Commands
+
+- **Query** — refresh all drivers from the Protect API
+
 ## Camera nodes
 
 Each Protect camera becomes an ISY node keyed by MAC address (stable across re-adoption).

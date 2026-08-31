@@ -1,6 +1,7 @@
 # Node Server Names
 ND-unifi_controller-NAME = UniFi Protect Controller
 ND-unifi_camera-NAME = UniFi Camera
+ND-unifi_sensor-NAME = UniFi Sensor
 
 # Controller Drivers
 ST-unifi_controller-ST-NAME = Status
@@ -19,3 +20,18 @@ ST-unifi_camera-GV5-NAME = Package
 
 # Camera Commands
 CMD-unifi_camera-QUERY-NAME = Query
+
+# Sensor Drivers
+ST-unifi_sensor-ST-NAME = Connected
+ST-unifi_sensor-GV1-NAME = Motion
+ST-unifi_sensor-GV2-NAME = Contact Open
+ST-unifi_sensor-GV3-NAME = Leak
+ST-unifi_sensor-GV4-NAME = Tamper
+ST-unifi_sensor-GV5-NAME = Alarm
+ST-unifi_sensor-GV6-NAME = Glass Break
+ST-unifi_sensor-CV1-NAME = Temperature
+ST-unifi_sensor-CV2-NAME = Humidity
+ST-unifi_sensor-CV3-NAME = Light Level
+
+# Sensor Commands
+CMD-unifi_sensor-QUERY-NAME = Query

@@ -32,4 +32,26 @@
     </cmds>
   </nodeDef>
 
+  <!-- USL / UP Sense Sensor Node -->
+  <nodeDef id="unifi_sensor" nodeType="139" nls="unifi_sensor">
+    <sts>
+      <st id="ST"  editor="E_STATUS"/>     <!-- Connected -->
+      <st id="GV1" editor="E_STATUS"/>     <!-- Motion -->
+      <st id="GV2" editor="E_STATUS"/>     <!-- Contact open -->
+      <st id="GV3" editor="E_STATUS"/>     <!-- Leak / wet -->
+      <st id="GV4" editor="E_STATUS"/>     <!-- Tamper -->
+      <st id="GV5" editor="E_STATUS"/>     <!-- Alarm / smoke -->
+      <st id="GV6" editor="E_STATUS"/>     <!-- Glass break -->
+      <st id="CV1" editor="E_TEMP"/>       <!-- Temperature °C -->
+      <st id="CV2" editor="E_HUMID"/>      <!-- Humidity % -->
+      <st id="CV3" editor="E_LUX"/>        <!-- Light lux -->
+    </sts>
+    <cmds>
+      <sends/>
+      <accepts>
+        <cmd id="QUERY"/>
+      </accepts>
+    </cmds>
+  </nodeDef>
+
 </nodeDefs>
