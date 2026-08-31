@@ -91,9 +91,9 @@ Each adopted Protect sensor becomes an ISY node keyed by MAC address. Drivers ar
 
 | Driver | Meaning | Units |
 |---|---|---|
-| **Temperature** | `stats.temperature` | °C (ISY uom 105) |
-| **Humidity** | `stats.humidity` | % |
-| **Light Level** | `stats.light` | lux |
+| **Temperature** | `stats.temperature` | °C (ISY uom 4) |
+| **Humidity** | `stats.humidity` | % (ISY uom 22) |
+| **Light Level** | `stats.light` | lux (ISY uom 36) |
 
 Drivers for capabilities the physical sensor does not advertise stay at 0 and are not updated.
 

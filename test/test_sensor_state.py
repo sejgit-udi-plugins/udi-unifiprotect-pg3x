@@ -21,6 +21,20 @@ def test_metric_value_from_stats():
     assert sensor_state.metric_value(sensor, 'light') is None
 
 
+def test_merge_preserves_connection_on_partial_update():
+    base = {
+        'state': 'CONNECTED',
+        'isOpened': True,
+        'stats': {'temperature': {'value': 21.0}},
+    }
+    update = {'stats': {'humidity': {'value': 44.0}}}
+    merged = sensor_state.merge_sensor_state(base, update)
+    assert sensor_state.is_connected(merged)
+    assert merged['isOpened'] is True
+    assert sensor_state.metric_value(merged, 'temperature') == 21.0
+    assert sensor_state.metric_value(merged, 'humidity') == 44.0
+
+
 def test_feature_flags_gate_temperature():
     sensor = {
         'featureFlags': {'temperature': {'channelCount': 1}},

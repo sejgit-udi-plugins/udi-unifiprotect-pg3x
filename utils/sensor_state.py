@@ -99,6 +99,30 @@ def is_connected(sensor: dict) -> bool:
     return (sensor.get('state') or '').upper() == 'CONNECTED'
 
 
+def merge_sensor_state(base: dict, update: dict) -> dict:
+    """Merge a partial Protect device WebSocket payload into cached state."""
+    merged = dict(base)
+    for key, value in update.items():
+        if key == 'stats' and isinstance(value, dict):
+            stats = dict(merged.get('stats') or {})
+            for metric, block in value.items():
+                if isinstance(block, dict):
+                    prev = dict(stats.get(metric) or {})
+                    prev.update(block)
+                    stats[metric] = prev
+                else:
+                    stats[metric] = block
+            merged['stats'] = stats
+            continue
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            nested = dict(merged[key])
+            nested.update(value)
+            merged[key] = nested
+            continue
+        merged[key] = value
+    return merged
+
+
 def contact_open(sensor: dict) -> bool:
     opened = sensor.get('isOpened')
     return bool(opened) if opened is not None else False

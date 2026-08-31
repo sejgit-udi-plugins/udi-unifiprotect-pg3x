@@ -20,9 +20,9 @@ class Sensor(udi_interface.Node):
         {'driver': 'GV4', 'value': 0, 'uom': 2},   # Tamper
         {'driver': 'GV5', 'value': 0, 'uom': 2},   # Alarm / smoke
         {'driver': 'GV6', 'value': 0, 'uom': 2},   # Glass break
-        {'driver': 'CV1', 'value': 0, 'uom': 105}, # Temperature °C
+        {'driver': 'CV1', 'value': 0, 'uom': 4},   # Temperature °C
         {'driver': 'CV2', 'value': 0, 'uom': 22},  # Humidity %
-        {'driver': 'CV3', 'value': 0, 'uom': 76},  # Light lux
+        {'driver': 'CV3', 'value': 0, 'uom': 36},  # Light lux
     ]
 
     BINARY_DRIVERS = ('GV1', 'GV2', 'GV3', 'GV4', 'GV5', 'GV6')
@@ -34,6 +34,7 @@ class Sensor(udi_interface.Node):
         self._timers = {}
         self._timer_lock = threading.Lock()
         self._caps = set()
+        self._state: dict = {}
 
     def _set_bin(self, driver, active: bool):
         self.setDriver(driver, 1 if active else 0, report=True, force=False)
@@ -44,7 +45,12 @@ class Sensor(udi_interface.Node):
     def set_capabilities(self, caps: set):
         self._caps = caps
 
-    def apply_state(self, sensor: dict):
+    def apply_state(self, sensor: dict, *, replace: bool = False):
+        if replace or not self._state:
+            self._state = dict(sensor)
+        else:
+            self._state = sensor_state.merge_sensor_state(self._state, sensor)
+        sensor = self._state
         self.set_connected(sensor_state.is_connected(sensor))
         if sensor_state.CAP_MOTION in self._caps:
             self._set_bin('GV1', bool(sensor.get('isMotionDetected')))
@@ -116,7 +122,7 @@ class Sensor(udi_interface.Node):
     async def _refresh(self):
         try:
             data = await self._ctrl._client.get_sensor(self.sensor_id)
-            self.apply_state(data)
+            self.apply_state(data, replace=True)
             self.reportDrivers()
         except Exception as e:
             LOGGER.warning(f'{self.name}: query refresh failed: {e}')

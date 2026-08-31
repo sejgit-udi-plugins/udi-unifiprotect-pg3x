@@ -319,7 +319,7 @@ class Controller(udi_interface.Node):
         if address in self._sensors:
             node = self._sensors[address]
             node.set_capabilities(caps)
-            node.apply_state(sensor)
+            node.apply_state(sensor, replace=True)
             return node
 
         name = sensor.get('name') or sensor_id
@@ -327,7 +327,7 @@ class Controller(udi_interface.Node):
         node.set_capabilities(caps)
         self._add_node_wait(node, timeout=3)
         node.clear_detections()
-        node.apply_state(sensor)
+        node.apply_state(sensor, replace=True)
         self._sensors[address] = node
         LOGGER.info(f'Added sensor: {name} ({address}) caps={sorted(caps)}')
         return node
@@ -443,7 +443,7 @@ class Controller(udi_interface.Node):
             node = self._node_for_sensor(sensor.get('id', ''))
             if node:
                 node.set_capabilities(sensor_capabilities(sensor))
-                node.apply_state(sensor)
+                node.apply_state(sensor, replace=True)
             else:
                 await asyncio.get_event_loop().run_in_executor(
                     None, self._ensure_sensor, sensor)

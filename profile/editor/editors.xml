@@ -3,12 +3,12 @@
     <range uom="2" subset="0,1"/>
   </editor>
   <editor id="E_TEMP">
-    <range uom="105" min="-40" max="60" prec="1"/>
+    <range uom="4" min="-40" max="60" prec="1"/>
   </editor>
   <editor id="E_HUMID">
     <range uom="22" min="0" max="100" prec="0"/>
   </editor>
   <editor id="E_LUX">
-    <range uom="76" min="0" max="100000" prec="0"/>
+    <range uom="36" min="0" max="100000" prec="0"/>
   </editor>
 </editors>

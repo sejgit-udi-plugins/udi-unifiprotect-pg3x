@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## 1.3.1
+
+- Fix sensor Connected flapping on WebSocket partial updates (merge cached state)
+- Fix environmental UOMs: °C=4, lux=36 (was inches/wind direction)
+
 ## 1.3.0
 
 - Add USL / UP Sense sensor nodes via `GET /integration/v1/sensors`
