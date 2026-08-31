@@ -2,6 +2,8 @@
 
 NodeServer for Universal Devices **EISY** or **Polisy** (Polyglot V3). UniFi Protect api integration of cameras and USL/UP Sense sensors — detection events for ISY programs.
 
+**UD store listing:** `UnifiProtapi` (15-character name limit on the store; same plugin as this repo).
+
 Repository: [sejgit-udi-plugins/udi-unifiprotectapi-pg3x](https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x)
 
 ## Scope and design
