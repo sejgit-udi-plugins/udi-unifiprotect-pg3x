@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from utils.camera_layouts import normalize_detect_type
+
 NODEDEF_DETECT = 'unifi_camera_detect'
 NODEDEF_AI = 'unifi_camera_ai'
 NODEDEF_AI_AUDIO = 'unifi_camera_ai_audio'
@@ -12,7 +14,7 @@ NODEDEF_DOORBELL = 'unifi_camera_doorbell'
 _BASIC_SMART = frozenset({'person', 'vehicle', 'animal', 'package'})
 _AI_SMART = frozenset({'face', 'licenseplate', 'license_plate'})
 _AUDIO_SMART = frozenset({
-    'smoke', 'cmonx', 'co', 'alrmspeak', 'siren', 'babycry', 'speak',
+    'smoke', 'cmonx', 'co', 'siren', 'speak', 'babycry',
     'bark', 'burglar', 'carhorn', 'car_horn', 'glassbreak', 'glass_break',
 })
 
@@ -23,7 +25,7 @@ def _feature_flags(camera: dict) -> dict:
 
 
 def _normalize(values: Iterable[str]) -> set:
-    return {str(v).lower().replace('_', '').replace('-', '') for v in values}
+    return {normalize_detect_type(v) for v in values}
 
 
 def camera_smart_types(camera: dict) -> set:
@@ -87,7 +89,7 @@ def camera_nodedef_for(camera: dict) -> str:
 
 
 def camera_supports_smart_type(camera: dict, normalized_type: str) -> bool:
-    norm = normalized_type.lower().replace('_', '').replace('-', '')
+    norm = normalize_detect_type(normalized_type)
     if norm == 'motion':
         return True
     if norm == 'line' or norm == 'linecross':

@@ -12,11 +12,10 @@ LOGGER = udi_interface.LOGGER
 CmdPair = Tuple[str, str]
 
 
-def driver_is_on(node: udi_interface.Node, driver: str) -> bool:
-    try:
-        return bool(node.getDriver(driver))
-    except Exception:
-        return False
+def _emit_control(node: udi_interface.Node, cmd: str, driver: str) -> None:
+    """Send an ISY control command (matches other PG3x plugins: cmd + value hint)."""
+    LOGGER.info(f'{node.name}: reportCmd {cmd} ({driver})')
+    node.reportCmd(cmd, 2)
 
 
 def set_binary_detection(
@@ -31,16 +30,16 @@ def set_binary_detection(
     on_timeout: Callable[[str], None],
     force: bool = False,
 ) -> None:
-    """Set a detection driver and emit control commands on transitions."""
-    was_on = driver_is_on(node, driver)
-    node.setDriver(driver, 1 if active else 0, report=True, force=force)
+    """Set a detection driver and emit control commands when the value changes."""
+    changed = node.setDriver(
+        driver, 1 if active else 0, report=True, force=force)
 
-    if cmd_pair:
+    if cmd_pair and changed:
         on_cmd, off_cmd = cmd_pair
-        if active and not was_on:
-            node.reportCmd(on_cmd)
-        elif not active and was_on:
-            node.reportCmd(off_cmd)
+        if active:
+            _emit_control(node, on_cmd, driver)
+        else:
+            _emit_control(node, off_cmd, driver)
 
     with timer_lock:
         existing = timers.pop(driver, None)

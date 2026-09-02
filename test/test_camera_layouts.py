@@ -16,3 +16,7 @@ def test_lookup_person_and_ring():
 def test_lookup_audio_types():
     assert lookup_detection('smoke')[0] == 'GV9'
     assert lookup_detection('glassBreak')[0] == 'GV14'
+    assert lookup_detection('alrmSiren') == ('GV11', ('SIREN', 'NOSIREN'))
+    assert lookup_detection('alrmSmoke') == ('GV9', ('SMOKE', 'NOSMOKE'))
+    assert lookup_detection('alrmSpeak') == ('GV15', ('SPEAK', 'NOSPEAK'))
+    assert lookup_detection('alrmGlassBreak') == ('GV14', ('GLASS', 'NOGLASS'))

@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here.
 
+## 1.5.3
+
+- Tie ``reportCmd`` to driver value changes (same condition as Status updates)
+- Log every control command at INFO (``reportCmd LINE (GV8)``) for EISY log verification
+- Match Hunter Douglas / Virtual ``reportCmd(cmd, 2)`` pattern
+- Normalize Protect ``alrmSiren`` / ``alrmSmoke`` audio type strings for siren and smoke detections
+- Read ``smartDetectEvents`` when audio types arrive on that field
+
 ## 1.5.2
 
 - Complete NLS command names for all nodedefs (fixes missing Control triggers on AI+Audio cameras)

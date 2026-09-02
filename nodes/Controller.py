@@ -423,6 +423,15 @@ class Controller(udi_interface.Node):
 
         smart_types = list(data.get('smartDetectTypes') or [])
         audio_types = list(data.get('smartDetectAudioTypes') or [])
+        # Some API payloads list detections only in smartDetectEvents.
+        extra_types = list(data.get('smartDetectEvents') or [])
+        seen = set()
+        bundled_types = []
+        for obj in smart_types + audio_types + extra_types:
+            key = str(obj)
+            if key and key not in seen:
+                seen.add(key)
+                bundled_types.append(key)
 
         if cam_node:
             evt_lower = evt_type.lower()
@@ -434,15 +443,17 @@ class Controller(udi_interface.Node):
                 LOGGER.info(
                     f'Line crossing event on {cam_node.name}: open={is_open}')
                 cam_node.set_detection_type('line', is_open)
-            for obj in smart_types:
-                cam_node.set_smart(str(obj), is_open)
-            for obj in audio_types:
-                cam_node.set_detection_type(str(obj), is_open)
+            elif evt_lower == 'smartaudiodetect' and not bundled_types:
+                LOGGER.warning(
+                    f'Audio detect event on {cam_node.name} with no types: '
+                    f'{data.get("id", "")}')
+            for obj in bundled_types:
+                cam_node.set_detection_type(obj, is_open)
 
         if sensor_node:
             if evt_type == 'motion':
                 sensor_node.set_motion(is_open)
-            is_glass = any('glass' in str(t).lower() for t in smart_types + audio_types)
+            is_glass = any('glass' in str(t).lower() for t in bundled_types)
             if is_glass and sensor_state.CAP_GLASS in sensor_node._caps:
                 sensor_node.set_glass_break(is_open)
 

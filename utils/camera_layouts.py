@@ -21,7 +21,6 @@ SMART_TYPE_MAP: Dict[str, Tuple[str, CmdPair]] = {
     'smoke': ('GV9', ('SMOKE', 'NOSMOKE')),
     'cmonx': ('GV10', ('CO', 'NOCO')),
     'co': ('GV10', ('CO', 'NOCO')),
-    'alrmspeak': ('GV11', ('SIREN', 'NOSIREN')),
     'siren': ('GV11', ('SIREN', 'NOSIREN')),
     'babycry': ('GV12', ('BABYCRY', 'NOBABYCRY')),
     'carhorn': ('GV13', ('HORN', 'NOHORN')),
@@ -36,7 +35,12 @@ SMART_TYPE_MAP: Dict[str, Tuple[str, CmdPair]] = {
 
 
 def normalize_detect_type(value: str) -> str:
-    return str(value).lower().replace('_', '').replace('-', '')
+    """Normalize Protect smartDetectTypes / smartDetectAudioTypes strings."""
+    s = str(value).lower().replace('_', '').replace('-', '')
+    # Events use alrmSmoke, alrmSiren, alrmSpeak, etc.
+    if s.startswith('alrm'):
+        s = s[4:]
+    return s
 
 
 def lookup_detection(value: str) -> Optional[Tuple[str, CmdPair]]:
