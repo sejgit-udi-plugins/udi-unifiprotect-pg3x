@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## 1.5.4
+
+- Send control commands with explicit value and uom (``reportCmd(cmd, 1, 2)`` / ``(cmd, 0, 2)``) so Python udi_interface forwards them to ISY
+- Remove ``nodeType="139"`` from camera and sensor nodedefs (match Virtual/MQTT/Hunter Douglas; keep on controller only)
+- After updating: delete UniFi camera nodes in ISY, run DISCOVER, then recreate Control programs
+
 ## 1.5.3
 
 - Tie ``reportCmd`` to driver value changes (same condition as Status updates)

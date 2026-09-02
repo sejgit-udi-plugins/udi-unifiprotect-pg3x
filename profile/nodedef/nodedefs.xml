@@ -14,7 +14,7 @@
   </nodeDef>
 
   <!-- Camera nodedefs (capability-based) -->
-  <nodeDef id="unifi_camera_detect" nodeType="139" nls="unifi_camera_detect">
+  <nodeDef id="unifi_camera_detect" nls="unifi_camera_detect">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -36,7 +36,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_camera_ai" nodeType="139" nls="unifi_camera_ai">
+  <nodeDef id="unifi_camera_ai" nls="unifi_camera_ai">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -64,7 +64,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_camera_ai_audio" nodeType="139" nls="unifi_camera_ai_audio">
+  <nodeDef id="unifi_camera_ai_audio" nls="unifi_camera_ai_audio">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -110,7 +110,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_camera_doorbell" nodeType="139" nls="unifi_camera_doorbell">
+  <nodeDef id="unifi_camera_doorbell" nls="unifi_camera_doorbell">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -137,7 +137,7 @@
   </nodeDef>
 
   <!-- Sensor nodedefs (capability-based) -->
-  <nodeDef id="unifi_sensor_contact" nodeType="139" nls="unifi_sensor_contact">
+  <nodeDef id="unifi_sensor_contact" nls="unifi_sensor_contact">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -153,7 +153,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_sensor_motion" nodeType="139" nls="unifi_sensor_motion">
+  <nodeDef id="unifi_sensor_motion" nls="unifi_sensor_motion">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -169,7 +169,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_sensor_leak" nodeType="139" nls="unifi_sensor_leak">
+  <nodeDef id="unifi_sensor_leak" nls="unifi_sensor_leak">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -185,7 +185,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_sensor_glass" nodeType="139" nls="unifi_sensor_glass">
+  <nodeDef id="unifi_sensor_glass" nls="unifi_sensor_glass">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>
@@ -203,7 +203,7 @@
     </cmds>
   </nodeDef>
 
-  <nodeDef id="unifi_sensor_env" nodeType="139" nls="unifi_sensor_env">
+  <nodeDef id="unifi_sensor_env" nls="unifi_sensor_env">
     <sts>
       <st id="ST"  editor="E_STATUS"/>
       <st id="GV1" editor="E_STATUS"/>

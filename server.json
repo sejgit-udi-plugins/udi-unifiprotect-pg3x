@@ -21,7 +21,7 @@
         {
             "title": "Unifi Protect api",
             "author": "Stephen Jenkins",
-            "version": "1.5.2",
+            "version": "1.5.4",
             "date": "August 2026",
             "source": "https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x",
             "license": "https://github.com/sejgit-udi-plugins/udi-unifiprotectapi-pg3x/blob/main/LICENSE"

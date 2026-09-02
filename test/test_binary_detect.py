@@ -19,7 +19,7 @@ def test_set_binary_detection_fires_on_cmd():
     )
 
     node.setDriver.assert_called_once_with('GV1', 1, report=True, force=False)
-    node.reportCmd.assert_called_once_with('MOTION', 2)
+    node.reportCmd.assert_called_once_with('MOTION', 1, 2)
 
 
 def test_set_binary_detection_fires_off_cmd():
@@ -35,7 +35,7 @@ def test_set_binary_detection_fires_off_cmd():
         timeout_sec=0, on_timeout=MagicMock(),
     )
 
-    node.reportCmd.assert_called_once_with('NOMOTION', 2)
+    node.reportCmd.assert_called_once_with('NOMOTION', 0, 2)
 
 
 def test_set_binary_detection_no_duplicate_on():
